@@ -19,8 +19,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @NonNull
     public User createUser(@NonNull User user) {
-        final String email = Optional.ofNullable(user.getEmail())
-                .orElseThrow(() -> new IllegalStateException("Не передан email обновляемого пользователя"));
+        final String email = user.getEmail();
         if (userStorage.isUserEmailNotFound(email)) {
             return userStorage.createUser(user);
         }
@@ -51,9 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @NonNull
     public User updateUser(@NonNull User user) {
-        final Long userId = Optional.ofNullable(user.getId())
-                .orElseThrow(() -> new IllegalStateException("Не передан id обновляемого пользователя"));
-
+        final Long userId = user.getId();
         final boolean isConflictEmail = Optional.ofNullable(user.getEmail())
                 .flatMap(userStorage::getUserByEmail)
                 .map(User::getId)

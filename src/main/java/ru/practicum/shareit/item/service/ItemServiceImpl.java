@@ -38,8 +38,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @NonNull
     public Item checkOwnerAndUpdateItem(@NonNull Item itemUpdates, long userId) {
-        final Long itemId = Optional.ofNullable(itemUpdates.getId())
-                .orElseThrow(() -> new IllegalStateException("Не передан id обновляемой вещи"));
+        final Long itemId = itemUpdates.getId();
         Item foundItem = itemStorage.getItemById(itemId)
                 .orElseThrow(() -> new NotFoundException("Не найдена вещь с id=" + itemId));
 
