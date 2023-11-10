@@ -128,7 +128,7 @@ class ItemServiceImplTest {
         Item expectedItem = getValidItem();
         when(itemStorage.getItemById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> itemService.checkOwnerAndUpdateItem(expectedItem ,1L));
+        assertThrows(NotFoundException.class, () -> itemService.checkOwnerAndUpdateItem(expectedItem,1L));
 
         verify(itemStorage).getItemById(expectedItem.getId());
     }
@@ -139,7 +139,7 @@ class ItemServiceImplTest {
         expectedItem.setOwner(getValidUser());
         when(itemStorage.getItemById(anyLong())).thenReturn(Optional.of(expectedItem));
 
-        assertThrows(NotFoundException.class, () -> itemService.checkOwnerAndUpdateItem(expectedItem ,1000L));
+        assertThrows(NotFoundException.class, () -> itemService.checkOwnerAndUpdateItem(expectedItem,1000L));
 
         verify(itemStorage).getItemById(expectedItem.getId());
     }
@@ -153,8 +153,8 @@ class ItemServiceImplTest {
         when(itemStorage.getItemById(anyLong())).thenReturn(Optional.of(oldItem));
         when(itemStorage.updateItem(any())).thenReturn(expectedItem);
 
-        var actual =itemService.checkOwnerAndUpdateItem(
-                Item.builder().id(1L).name("newname").build() ,oldItem.getOwner().getId());
+        var actual = itemService.checkOwnerAndUpdateItem(
+                Item.builder().id(1L).name("newname").build(), oldItem.getOwner().getId());
 
         verify(itemStorage).getItemById(oldItem.getId());
         verify(itemStorage).updateItem(expectedItem);

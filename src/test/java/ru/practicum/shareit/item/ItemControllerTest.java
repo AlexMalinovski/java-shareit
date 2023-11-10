@@ -132,7 +132,7 @@ class ItemControllerTest {
     @Test
     void getOwnedItems_isAvailable() throws Exception {
         when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
-        when(itemService.getOwnedItems( 1L)).thenReturn(List.of(getValidItem()));
+        when(itemService.getOwnedItems(1L)).thenReturn(List.of(getValidItem()));
 
         mockMvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 1L))
