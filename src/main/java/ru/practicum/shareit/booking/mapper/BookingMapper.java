@@ -13,11 +13,11 @@ public interface BookingMapper {
 
     @Mapping(target = "status", expression = "java(ru.practicum.shareit.booking.enums.BookStatus.WAITING)")
     @Mapping(target = "item", expression = "java(ru.practicum.shareit.item.model.Item.builder().id(dto.getItemId()).build())")
-    @Mapping(target="start", source="dto.start", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
-    @Mapping(target="end", source="dto.end", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "start", source = "dto.start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "end", source = "dto.end", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     Booking mapCreateBookingDtoToBooking(CreateBookingDto dto);
 
-    @Mapping(target="start", source="booking.start", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
-    @Mapping(target="end", source="booking.end", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "start", source = "booking.start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "end", source = "booking.end", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     BookingDto mapBookingToBookingDto(Booking booking);
 }

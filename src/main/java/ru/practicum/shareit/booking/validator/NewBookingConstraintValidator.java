@@ -40,7 +40,7 @@ public class NewBookingConstraintValidator implements ConstraintValidator<NewBoo
             addMessage.accept("Дата завершения бронирования раньше текущей даты");
             return false;
         }
-        if(start.isAfter(end)) {
+        if (start.isAfter(end)) {
            addMessage.accept("Дата начала бронирования позже даты завершения");
            return false;
         }

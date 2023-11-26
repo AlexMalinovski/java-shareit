@@ -22,12 +22,12 @@ public interface ItemMapper {
     ItemDto mapItemToItemDto(Item item);
 
     @Mapping(target = "bookerId", expression = "java(booking.getBooker().getId())")
-    @Mapping(target="start", source="start", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
-    @Mapping(target="end", source="end", dateFormat="yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "start", source = "start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "end", source = "end", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     BookingInfoDto mapBookingInfoToDto(Booking booking);
 
     @Mapping(target = "authorName", expression = "java(comment.getAuthor().getName())")
-    @Mapping(target="created", source="created", dateFormat="yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @Mapping(target = "created", source = "created", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     CommentDto mapCommentToCommentDto(Comment comment);
 
     Comment mapCreateCommentDtoToComment(CreateCommentDto dto);
