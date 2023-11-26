@@ -7,10 +7,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -21,6 +24,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -93,6 +97,34 @@ class ItemControllerTest {
                 .build();
     }
 
+    private CreateCommentDto getValidCreateCommentDto() {
+        return CreateCommentDto.builder().text("comment").build();
+    }
+
+    private Comment getValidComment() {
+        return getValidNewComment()
+                .toBuilder()
+                .id(1L)
+                .build();
+    }
+
+    private Comment getValidNewComment() {
+        return Comment.builder()
+                .item(getValidItem())
+                .author(getValidUser())
+                .text("comment")
+                .build();
+    }
+
+    private CommentDto getValidCommentDto() {
+        return CommentDto.builder()
+                .id(1L)
+                .text("comment")
+                .authorName(getValidUser().getName())
+                .created("2022-01-01'T'00:00:00")
+                .build();
+    }
+
     @Test
     void createItem_isAvailable() throws Exception {
         when(itemMapper.mapCreateItemDtoToItem(any())).thenReturn(getValidNewItem());
@@ -148,4 +180,23 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void createComment_isAvailable() throws Exception {
+        when(itemMapper.mapCreateCommentDtoToComment(any())).thenReturn(getValidNewComment());
+        when(itemService.checkAuthorItemAndCreateComment(anyLong(), anyLong(), any(Comment.class)))
+                .thenReturn(getValidComment());
+        when(itemMapper.mapCommentToCommentDto(any(Comment.class))).thenReturn(getValidCommentDto());
+
+        mockMvc.perform(post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(getValidCreateCommentDto())))
+                .andExpect(status().isOk());
+
+        verify(itemMapper).mapCreateCommentDtoToComment(getValidCreateCommentDto());
+        verify(itemService).checkAuthorItemAndCreateComment(1L, 1L, getValidNewComment());
+        verify(itemMapper).mapCommentToCommentDto(getValidComment());
+    }
+
 }

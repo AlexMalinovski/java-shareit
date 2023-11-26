@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -17,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,23 +50,21 @@ class UserServiceImplTest {
     @Test
     void createUser_ifConflictEmail_thenThrowConflictException() {
         var expected = getValidUser();
-        when(userStorage.isUserEmailNotFound(anyString())).thenReturn(false);
+        when(userStorage.save(any(User.class))).thenThrow(new DataIntegrityViolationException(""));
 
         assertThrows(ConflictException.class, () -> userService.createUser(expected));
 
-        verify(userStorage).isUserEmailNotFound(expected.getEmail());
+        verify(userStorage).save(expected);
     }
 
     @Test
     void createUser_returnCreated() {
         var expected = getValidNewUser();
-        when(userStorage.isUserEmailNotFound(expected.getEmail())).thenReturn(true);
-        when(userStorage.createUser(expected)).thenReturn(getValidUser());
+        when(userStorage.save(expected)).thenReturn(getValidUser());
 
         var actual = userService.createUser(expected);
 
-        verify(userStorage).isUserEmailNotFound(expected.getEmail());
-        verify(userStorage).createUser(expected);
+        verify(userStorage).save(expected);
         assertNotNull(actual);
         assertEquals(1L, actual.getId());
         assertEquals(expected.getName(), actual.getName());
@@ -74,11 +73,11 @@ class UserServiceImplTest {
 
     @Test
     void getUserById_ifNotFound_thenReturnEmpty() {
-        when(userStorage.getUserById(anyLong())).thenReturn(Optional.empty());
+        when(userStorage.findById(anyLong())).thenReturn(Optional.empty());
 
         var actual = userService.getUserById(1L);
 
-        verify(userStorage).getUserById(1L);
+        verify(userStorage).findById(1L);
         assertNotNull(actual);
         assertTrue(actual.isEmpty());
     }
@@ -86,11 +85,11 @@ class UserServiceImplTest {
     @Test
     void getUserById_ifFound_thenReturnFounded() {
         var expected = getValidUser();
-        when(userStorage.getUserById(anyLong())).thenReturn(Optional.of(expected));
+        when(userStorage.findById(anyLong())).thenReturn(Optional.of(expected));
 
         var actual = userService.getUserById(1L);
 
-        verify(userStorage).getUserById(1L);
+        verify(userStorage).findById(1L);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -98,11 +97,11 @@ class UserServiceImplTest {
 
     @Test
     void getAllUsers_ifNotFound_thenReturnEmptyList() {
-        when(userStorage.getAllUsers()).thenReturn(List.of());
+        when(userStorage.findAll()).thenReturn(List.of());
 
         var actual = userService.getAllUsers();
 
-        verify(userStorage).getAllUsers();
+        verify(userStorage).findAll();
         assertNotNull(actual);
         assertTrue(actual.isEmpty());
     }
@@ -110,11 +109,11 @@ class UserServiceImplTest {
     @Test
     void deleteUser_ifFound_thenReturnFoundedList() {
         var expected = getValidUser();
-        when(userStorage.getAllUsers()).thenReturn(List.of(expected));
+        when(userStorage.findAll()).thenReturn(List.of(expected));
 
         var actual = userService.getAllUsers();
 
-        verify(userStorage).getAllUsers();
+        verify(userStorage).findAll();
         assertNotNull(actual);
         assertEquals(1, actual.size());
         assertEquals(expected, actual.get(0));
@@ -123,42 +122,37 @@ class UserServiceImplTest {
     @Test
     void updateUser_ifConflictEmail_thenThrowConflictException() {
         var expected = getValidUser();
-        when(userStorage.getUserByEmail(expected.getEmail()))
-                .thenReturn(Optional.of(User.builder().id(100L).email(expected.getEmail()).build()));
+        when(userStorage.findById(anyLong())).thenReturn(Optional.of(expected));
+        when(userStorage.save(any(User.class))).thenThrow(new DataIntegrityViolationException(""));
 
         assertThrows(ConflictException.class, () -> userService.updateUser(expected));
 
-        verify(userStorage).getUserByEmail(expected.getEmail());
+        verify(userStorage).findById(expected.getId());
+        verify(userStorage).save(expected);
     }
 
     @Test
     void updateUser_ifUserNotFound_thenThrowNotFoundException() {
         var expected = getValidUser();
-        when(userStorage.getUserByEmail(expected.getEmail())).thenReturn(Optional.empty());
-        when(userStorage.getUserById(anyLong())).thenReturn(Optional.empty());
+        when(userStorage.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.updateUser(expected));
 
-        verify(userStorage).getUserByEmail(expected.getEmail());
-        verify(userStorage).getUserById(expected.getId());
+        verify(userStorage).findById(expected.getId());
     }
 
     @Test
     void updateUser_returnUpdated() {
         var oldUser = getValidUser();
         User updates = User.builder().id(oldUser.getId()).name("new name").email("new@e.mail").build();
-        User expected = oldUser.copyOf();
-        expected.setName(updates.getName());
-        expected.setEmail(updates.getEmail());
-        when(userStorage.getUserByEmail(updates.getEmail())).thenReturn(Optional.empty());
-        when(userStorage.getUserById(anyLong())).thenReturn(Optional.of(oldUser));
-        when(userStorage.updateUser(updates)).thenReturn(expected);
+        User expected = getValidUser().toBuilder().name(updates.getName()).email(updates.getEmail()).build();
+        when(userStorage.findById(anyLong())).thenReturn(Optional.of(oldUser));
+        when(userStorage.save(updates)).thenReturn(expected);
 
         var actual = userService.updateUser(updates);
 
-        verify(userStorage).getUserByEmail(updates.getEmail());
-        verify(userStorage).getUserById(updates.getId());
-        verify(userStorage).updateUser(updates);
+        verify(userStorage).findById(updates.getId());
+        verify(userStorage).save(updates);
         assertNotNull(actual);
         assertEquals(expected, actual);
     }

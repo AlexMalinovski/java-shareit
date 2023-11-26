@@ -42,6 +42,26 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<Object> badRequestExceptionHandler(BadRequestException ex, WebRequest request) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                ((ServletWebRequest) request).getRequest().getRequestURI(),
+                ex.getMessage());
+        log.trace(ex.getMessage());
+        return handleExceptionInternal(ex, problemDetail, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> badRequestParamExceptionHandler(BadRequestParamException ex, WebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.withCustomError(
+                HttpStatus.BAD_REQUEST,
+                ((ServletWebRequest) request).getRequest().getRequestURI(),
+                ex.getMessage());
+        log.trace(ex.getMessage());
+        return handleExceptionInternal(ex, problemDetail, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 HttpStatus.BAD_REQUEST,

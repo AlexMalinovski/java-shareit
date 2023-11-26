@@ -1,11 +1,12 @@
 package ru.practicum.shareit.item.model;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.model.Booking;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Column;
@@ -16,8 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -25,32 +25,25 @@ import java.util.List;
 @EqualsAndHashCode
 @Getter
 @Entity
-@Table(name = "items")
-public class Item {
+@Table(name = "comments")
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "description", nullable = false, length = 512)
-    private String description;
-
-    @Column(name = "available", nullable = false)
-    private Boolean available;
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
 
-    @Transient
-    private Booking lastBooking;
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
-    @Transient
-    private Booking nextBooking;
-
-    @Transient
-    private List<Comment> comments;
+    @CreationTimestamp
+    @Column(name = "created", nullable = false)
+    private LocalDateTime created;
 }

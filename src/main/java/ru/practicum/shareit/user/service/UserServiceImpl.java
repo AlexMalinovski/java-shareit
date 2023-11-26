@@ -1,8 +1,10 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
@@ -19,49 +21,49 @@ public class UserServiceImpl implements UserService {
     @Override
     @NonNull
     public User createUser(@NonNull User user) {
-        final String email = user.getEmail();
-        if (userStorage.isUserEmailNotFound(email)) {
-            return userStorage.createUser(user);
+        try {
+            return userStorage.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException(String.format("Пользователь с email=%s уже существует", user.getEmail()));
         }
-        throw new ConflictException(String.format("Пользователь с email=%s уже существует", user.getEmail()));
     }
 
     @Override
     public Optional<User> getUserById(long id) {
-        return userStorage.getUserById(id);
+        return userStorage.findById(id);
     }
 
     @Override
     @NonNull
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userStorage.findAll();
     }
 
     @Override
+    @Transactional
     public Optional<User> deleteUser(long id) {
-        return userStorage
-                .getUserById(id)
+        return userStorage.findById(id)
                 .map(u -> {
-                    userStorage.deleteUser(id);
+                    userStorage.deleteById(id);
                     return u;
                 });
     }
 
     @Override
     @NonNull
+    @Transactional
     public User updateUser(@NonNull User user) {
-        final Long userId = user.getId();
-        final boolean isConflictEmail = Optional.ofNullable(user.getEmail())
-                .flatMap(userStorage::getUserByEmail)
-                .map(User::getId)
-                .map(id -> !userId.equals(id))
-                .orElse(false);
-        if (isConflictEmail) {
+        try {
+            final Long userId = user.getId();
+            return userStorage.findById(userId)
+                    .map(foundedUser -> foundedUser.toBuilder()
+                            .name(user.getName() != null ? user.getName() : foundedUser.getName())
+                            .email(user.getEmail() != null ? user.getEmail() : foundedUser.getEmail())
+                            .build())
+                    .map(userStorage::save)
+                    .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + userId));
+        } catch (DataIntegrityViolationException ex) {
             throw new ConflictException(String.format("Пользователь с email=%s уже существует", user.getEmail()));
         }
-        return userStorage.getUserById(userId)
-                .map(u -> u.updateOnNonNullFields(user))
-                .map(userStorage::updateUser)
-                .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + userId));
     }
 }

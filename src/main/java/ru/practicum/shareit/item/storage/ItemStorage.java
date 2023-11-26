@@ -1,19 +1,13 @@
 package ru.practicum.shareit.item.storage;
 
-import org.springframework.lang.NonNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ItemStorage {
-    Item createItem(@NonNull Item item);
-
-    Optional<Item> getItemById(final long id);
-
-    Item updateItem(@NonNull Item item);
-
-    List<Item> getItemsByOwnerId(final long userId);
-
-    List<Item> getAvailableItemsBySubString(@NonNull final String text);
+@Repository
+public interface ItemStorage extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item>, ItemStorageCustom {
+    List<Item> findByOwner_IdOrderById(Long userId);
 }
