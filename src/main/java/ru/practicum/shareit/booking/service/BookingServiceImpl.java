@@ -44,7 +44,8 @@ public class BookingServiceImpl implements BookingService {
                     if (userStorage.existsById(id)) {
                         return id;
                     }
-                    throw new NotFoundException(String.format("Не найден пользователь с id=%d.", id));})
+                    throw new NotFoundException(String.format("Не найден пользователь с id=%d.", id));
+                })
                 .orElseThrow(() -> new IllegalArgumentException("Не указан id пользователя."));
 
         Item item = Optional.of(booking)
