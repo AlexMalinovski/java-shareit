@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,12 +14,12 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.util.Locale;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Entity
 @Table(name = "users")
 public class User {
@@ -44,4 +43,16 @@ public class User {
         this.emailLowercase = this.email != null ? this.email.toLowerCase(Locale.ROOT) : null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

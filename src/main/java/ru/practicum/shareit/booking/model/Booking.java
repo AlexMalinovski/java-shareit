@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.enums.BookStatus;
@@ -20,12 +19,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Getter
 @Entity
 @Table(name = "bookings")
@@ -53,19 +51,16 @@ public class Booking {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
 
-    public Optional<Long> getItemId() {
-        return Optional.ofNullable(this.item)
-                .map(Item::getId);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Booking)) return false;
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id);
     }
 
-    public Optional<Long> getBookerId() {
-        return Optional.ofNullable(this.booker)
-                .map(User::getId);
-    }
-
-    public Optional<Long> getItemOwnerId() {
-        return Optional.ofNullable(this.item)
-                .map(Item::getOwner)
-                .map(User::getId);
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

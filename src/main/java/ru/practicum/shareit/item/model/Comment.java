@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,11 +17,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Getter
 @Entity
 @Table(name = "comments")
@@ -46,4 +45,17 @@ public class Comment {
     @CreationTimestamp
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

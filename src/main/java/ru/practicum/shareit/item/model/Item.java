@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
@@ -18,11 +17,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.List;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Getter
 @Entity
 @Table(name = "items")
@@ -53,4 +52,17 @@ public class Item {
 
     @Transient
     private List<Comment> comments;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(id, item.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

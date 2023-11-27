@@ -23,7 +23,6 @@ import ru.practicum.shareit.user.storage.UserStorage;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,28 +37,34 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Booking createBookingRequest(@Valid @NewBooking Booking booking) {
-        final Item item = booking.getItemId()
+        final long bookerId = Optional.of(booking)
+                .map(Booking::getBooker)
+                .map(User::getId)
+                .map(id -> {
+                    if (userStorage.existsById(id)) {
+                        return id;
+                    }
+                    throw new NotFoundException(String.format("Не найден пользователь с id=%d.", id));})
+                .orElseThrow(() -> new IllegalArgumentException("Не указан id пользователя."));
+
+        Item item = Optional.of(booking)
+                .map(Booking::getItem)
+                .map(Item::getId)
                 .map(id -> itemStorage.findById(id)
                         .orElseThrow(() -> new NotFoundException(String.format("Не найдена вещь с id=%d.", id))))
                 .orElseThrow(() -> new IllegalArgumentException("Не указан id вещи."));
+
         if (!item.getAvailable()) {
             throw new BadRequestException(String.format("Вещь с id=%d недоступна для аренды.", item.getId()));
         }
-
-        final User booker = booking.getBookerId()
-                .map(id -> userStorage.findById(id)
-                        .orElseThrow(() -> new NotFoundException(String.format("Не найден пользователь с id=%d.", id))))
-                .orElseThrow(() -> new IllegalArgumentException("Не указан id пользователя."));
-
-        if (Objects.equals(booker.getId(), item.getOwner().getId())) {
+        if (bookerId == item.getOwner().getId()) {
             throw new NotFoundException("Действие недоступно для владельца бронируемой вещи");
         }
-
-        Booking newBooking = booking.toBuilder()
-                .id(null)
-                .booker(booker)
-                .item(item)
+        Booking newBooking = booking
+                .toBuilder()
+                .item(item) // результат, возвращаемый клиенту API, должен включать подробные сведения об item
                 .build();
+
         return bookingStorage.save(newBooking);
     }
 

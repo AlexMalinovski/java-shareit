@@ -97,6 +97,7 @@ class BookingServiceImplTest {
     @Test
     void createBookingRequest_ifItemNotFound_thenThrowNotFoundException() {
         Booking newBooking = getNewBooking();
+        when(userStorage.existsById(anyLong())).thenReturn(true);
         when(itemStorage.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> bookingService.createBookingRequest(newBooking));
@@ -108,6 +109,7 @@ class BookingServiceImplTest {
     void createBookingRequest_ifItemNotAvailable_thenThrowBadRequestException() {
         Item itemUnavailable = getValidItem().toBuilder().available(false).build();
         Booking newBooking = getNewBooking().toBuilder().item(itemUnavailable).build();
+        when(userStorage.existsById(anyLong())).thenReturn(true);
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(itemUnavailable));
 
         assertThrows(BadRequestException.class, () -> bookingService.createBookingRequest(newBooking));
@@ -118,13 +120,11 @@ class BookingServiceImplTest {
     @Test
     void createBookingRequest_ifBookerNotFound_thenThrowNotFoundException() {
         Booking newBooking = getNewBooking();
-        when(itemStorage.findById(anyLong())).thenReturn(Optional.of(getValidItem()));
-        when(userStorage.findById(newBooking.getBooker().getId())).thenReturn(Optional.empty());
+        when(userStorage.existsById(anyLong())).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> bookingService.createBookingRequest(newBooking));
 
-        verify(itemStorage).findById(newBooking.getItem().getId());
-        verify(userStorage).findById(newBooking.getBooker().getId());
+        verify(userStorage).existsById(newBooking.getBooker().getId());
     }
 
     @Test
@@ -132,13 +132,13 @@ class BookingServiceImplTest {
         Booking newBooking = getNewBooking().toBuilder().build();
         Booking expected = getBooking(null, newBooking.getStatus());
         when(itemStorage.findById(anyLong())).thenReturn(Optional.of(getValidItem()));
-        when(userStorage.findById(anyLong())).thenReturn(Optional.of(getValidBooker()));
-        when(bookingStorage.save(any(Booking.class))).thenReturn(expected.toBuilder().id(1L).build());
+        when(userStorage.existsById(anyLong())).thenReturn(true);
+        when(bookingStorage.save(any(Booking.class))).thenReturn(expected);
 
         bookingService.createBookingRequest(newBooking);
 
         verify(itemStorage).findById(newBooking.getItem().getId());
-        verify(userStorage).findById(newBooking.getBooker().getId());
+        verify(userStorage).existsById(newBooking.getBooker().getId());
         verify(bookingStorage).save(expected);
     }
 
