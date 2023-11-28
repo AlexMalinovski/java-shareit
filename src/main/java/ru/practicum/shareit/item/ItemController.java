@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -76,8 +79,10 @@ public class ItemController {
     public ResponseEntity<ItemDto> updateItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
                                               @PathVariable @Valid @Positive long itemId,
                                               @RequestBody UpdateItemDto updateItemDto) {
-        final Item item = itemMapper.mapUpdateItemDtoToItem(updateItemDto);
-        item.setId(itemId);
+        final Item item = itemMapper.mapUpdateItemDtoToItem(updateItemDto)
+                .toBuilder()
+                .id(itemId)
+                .build();
         Item updatedItem = itemService.checkOwnerAndUpdateItem(item, userId);
         return ResponseEntity.ok(itemMapper.mapItemToItemDto(updatedItem));
     }
@@ -114,5 +119,22 @@ public class ItemController {
                 .map(itemMapper::mapItemToItemDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(items);
+    }
+
+    /**
+     * Добавление комментария.
+     * Эндпоинт POST /items/{itemId}/comment
+     * @param userId id пользователя, бравшего в аренду вещь
+     * @param itemId id вещи
+     * @param createCommentDto CreateCommentDto
+     * @return CommentDto
+     */
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> createComment(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+                                                    @PathVariable @Valid @Positive long itemId,
+                                                    @RequestBody @Valid CreateCommentDto createCommentDto) {
+        Comment comment = itemMapper.mapCreateCommentDtoToComment(createCommentDto);
+        Comment created = itemService.checkAuthorItemAndCreateComment(userId, itemId, comment);
+        return ResponseEntity.ok(itemMapper.mapCommentToCommentDto(created));
     }
 }

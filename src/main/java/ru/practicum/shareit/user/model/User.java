@@ -1,32 +1,58 @@
 package ru.practicum.shareit.user.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import ru.practicum.shareit.common.InMemoryStored;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.Optional;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import java.util.Locale;
+import java.util.Objects;
 
-@Data
-@Builder
-public class User implements InMemoryStored<User> {
+@Builder(toBuilder = true)
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "email", nullable = false, length = 512)
     private String email;
 
-    @Override
-    public User copyOf() {
-        return User.builder()
-                .id(this.id)
-                .name(this.name)
-                .email(this.email)
-                .build();
+    @Column(name = "email_lowercase", nullable = false, length = 512, unique = true)
+    private String emailLowercase; // добавлено для совместимости с H2(не поддерживает function indexes)
+
+    @PrePersist
+    @PreUpdate
+    private void setLowercase() {
+        this.emailLowercase = this.email != null ? this.email.toLowerCase(Locale.ROOT) : null;
     }
 
-    public User updateOnNonNullFields(User userUpdates) {
-        Optional.ofNullable(userUpdates.getName())
-                .ifPresent(this::setName);
-        Optional.ofNullable(userUpdates.getEmail())
-                .ifPresent(this::setEmail);
-        return this;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

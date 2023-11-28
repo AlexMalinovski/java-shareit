@@ -15,7 +15,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -82,8 +82,10 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable @Valid @Positive long id,
                                               @RequestBody @Valid UpdateUserDto updateUserDto) {
-        final User user = userMapper.mapUpdateUserDtoToUser(updateUserDto);
-        user.setId(id);
+        final User user = userMapper.mapUpdateUserDtoToUser(updateUserDto)
+                .toBuilder()
+                .id(id)
+                .build();
         User updatedUser = userService.updateUser(user);
         return ResponseEntity.ok(userMapper.mapUserToUserDto(updatedUser));
     }

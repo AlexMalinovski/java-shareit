@@ -1,70 +1,177 @@
 package ru.practicum.shareit.item.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.enums.BookStatus;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.QBooking;
+import ru.practicum.shareit.booking.storage.BookingStorage;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.QItem;
+import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
+    private final BookingStorage bookingStorage;
+
+    private final CommentStorage commentStorage;
 
     @Override
     @NonNull
+    @Transactional()
     public Item setOwnerAndCreateItem(@NonNull Item item, long userId) {
-        User owner = userStorage.getUserById(userId)
+        User owner = userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + userId));
-        item.setOwner(owner);
-        return itemStorage.createItem(item);
+        return itemStorage.save(item.toBuilder()
+                .owner(owner)
+                .build());
     }
 
     @Override
-    public Optional<Item> getItemById(long id, long requesterId) {
-        userStorage.getUserById(requesterId)
-                .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + id));
-        return itemStorage.getItemById(id);
+    @Transactional(readOnly = true)
+    public Optional<Item> getItemById(final long itemId, final long requesterId) {
+        if (!userStorage.existsById(requesterId)) {
+            throw new NotFoundException("Не найден пользователь с id=" + requesterId);
+        }
+
+        Item foundItem = itemStorage.findById(itemId).orElse(null);
+        if (foundItem == null) {
+            return Optional.empty();
+        }
+        List<Comment> comments = commentStorage.findAllByItem_IdOrderByCreatedAsc(itemId);
+        if (requesterId != foundItem.getOwner().getId()) {
+            return Optional.of(
+                    foundItem.toBuilder()
+                            .comments(comments)
+                            .build());
+        }
+
+        final LocalDateTime now = LocalDateTime.now();
+        final Booking lastBooking = findLastItemBooking(itemId, now).orElse(null);
+        final Booking nextBooking = findNextItemBooking(itemId, now).orElse(null);
+        return Optional.of(
+                foundItem.toBuilder()
+                        .comments(comments)
+                        .lastBooking(lastBooking)
+                        .nextBooking(nextBooking)
+                        .build());
     }
 
     @Override
     @NonNull
+    @Transactional()
     public Item checkOwnerAndUpdateItem(@NonNull Item itemUpdates, long userId) {
         final Long itemId = itemUpdates.getId();
-        Item foundItem = itemStorage.getItemById(itemId)
+        Item foundItem = itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Не найдена вещь с id=" + itemId));
 
         if (userId != foundItem.getOwner().getId()) {
             throw new NotFoundException(
                     String.format("Пользователь с id=%d не является владельцем вещи с id=%d", userId, itemId));
         }
-        return itemStorage.updateItem(foundItem.updateOnNonNullFields(itemUpdates));
+        Item updateItem = foundItem.toBuilder()
+                .name(itemUpdates.getName() != null ? itemUpdates.getName() : foundItem.getName())
+                .description(itemUpdates.getDescription() != null ? itemUpdates.getDescription() : foundItem.getDescription())
+                .available(itemUpdates.getAvailable() != null ? itemUpdates.getAvailable() : foundItem.getAvailable())
+                .build();
+        return itemStorage.save(updateItem);
     }
 
     @Override
     @NonNull
+    @Transactional(readOnly = true)
     public List<Item> getOwnedItems(long userId) {
-        userStorage.getUserById(userId)
-                .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + userId));
-        return itemStorage.getItemsByOwnerId(userId);
+        if (!userStorage.existsById(userId)) {
+            throw new NotFoundException("Не найден пользователь с id=" + userId);
+        }
+        final LocalDateTime now = LocalDateTime.now();
+        return itemStorage.findByOwner_IdOrderById(userId)
+                .stream()
+                .map(item -> item.toBuilder()
+                        .lastBooking(findLastItemBooking(item.getId(), now)
+                                .orElse(null))
+                        .nextBooking(findNextItemBooking(item.getId(), now)
+                                .orElse(null))
+                        .comments(commentStorage.findAllByItem_IdOrderByCreatedAsc(item.getId()))
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
     @NonNull
+    @Transactional(readOnly = true)
     public List<Item> getAvailableItemsBySubString(@NonNull String text, long requesterId) {
-        userStorage.getUserById(requesterId)
-                .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + requesterId));
+        if (!userStorage.existsById(requesterId)) {
+                throw  new NotFoundException("Не найден пользователь с id=" + requesterId);
+        }
         if (text.isEmpty()) {
             return new ArrayList<>();
         }
-        return itemStorage.getAvailableItemsBySubString(text);
+
+        BooleanExpression byTextInNameOrDescription = QItem.item.name.containsIgnoreCase(text)
+                .or(QItem.item.description.containsIgnoreCase(text));
+        BooleanExpression byAvailableTrue = QItem.item.available.isTrue();
+        return itemStorage.findAllByExpression(byAvailableTrue.and(byTextInNameOrDescription));
+    }
+
+    @Override
+    @NonNull
+    @Transactional
+    public Comment checkAuthorItemAndCreateComment(long userId, long itemId, @NonNull Comment comment) {
+        BooleanExpression byBookerIdAndItemId = QBooking.booking.booker.id.eq(userId)
+                .and(QBooking.booking.item.id.eq(itemId));
+        BooleanExpression byStatusApproved = QBooking.booking.status.eq(BookStatus.APPROVED);
+        BooleanExpression byEndInPast = QBooking.booking.end.before(LocalDateTime.now());
+        Booking booking = bookingStorage
+                .findAny(byBookerIdAndItemId
+                        .and(byStatusApproved)
+                        .and(byEndInPast))
+                .orElseThrow(() -> new BadRequestException(
+                        String.format("Не найдено бронирование вещи id=%d пользователем с id=%d", itemId, userId)));
+        User author = booking.getBooker();
+        Item item = booking.getItem();
+
+        return commentStorage.save(comment.toBuilder()
+                .author(author)
+                .item(item)
+                .build());
+    }
+
+
+    private Optional<Booking> findLastItemBooking(final Long itemId, final LocalDateTime onDate) {
+        BooleanExpression byItemId = QBooking.booking.item.id.eq(itemId);
+        BooleanExpression byStartBefore = QBooking.booking.start.before(onDate);
+        BooleanExpression byStatus = QBooking.booking.status.eq(BookStatus.APPROVED);
+
+        return bookingStorage.findTopOrderByTime(
+                byItemId.and(byStartBefore).and(byStatus), QBooking.booking.start.desc());
+    }
+
+    private Optional<Booking> findNextItemBooking(final Long itemId, final LocalDateTime onDate) {
+        BooleanExpression byItemId = QBooking.booking.item.id.eq(itemId);
+        BooleanExpression byStartAfter = QBooking.booking.start.after(onDate);
+        BooleanExpression byStatus = QBooking.booking.status.eq(BookStatus.APPROVED)
+                .or(QBooking.booking.status.eq(BookStatus.WAITING));
+
+        return bookingStorage.findTopOrderByTime(
+                byItemId.and(byStartAfter).and(byStatus), QBooking.booking.start.asc());
     }
 }
