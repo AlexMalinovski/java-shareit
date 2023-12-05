@@ -16,16 +16,16 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
@@ -94,11 +94,13 @@ public class ItemController {
      * @return List<ItemDto>
      */
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getOwnedItems(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId) {
-        List<ItemDto> items = itemService.getOwnedItems(userId)
-                .stream()
-                .map(itemMapper::mapItemToItemDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ItemDto>> getOwnedItems(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
+        List<ItemDto> items = itemMapper.mapItemToItemDto(
+                itemService.getOwnedItems(userId, from, size));
         return ResponseEntity.ok(items);
     }
 
@@ -112,12 +114,13 @@ public class ItemController {
      * @return List<ItemDto>
      */
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                     @RequestParam String text) {
-        List<ItemDto> items = itemService.getAvailableItemsBySubString(text, userId)
-                .stream()
-                .map(itemMapper::mapItemToItemDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ItemDto>> searchItems(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId, @RequestParam String text,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
+        List<ItemDto> items = itemMapper.mapItemToItemDto(
+                itemService.getAvailableItemsBySubString(text, userId, from, size));
         return ResponseEntity.ok(items);
     }
 

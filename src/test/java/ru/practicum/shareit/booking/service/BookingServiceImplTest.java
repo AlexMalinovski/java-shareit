@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -217,7 +218,7 @@ class BookingServiceImplTest {
     void getUserBookings_ifUserNotFound_thenThrowNotFoundException() {
         when(userStorage.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> bookingService.getUserBookings(StateFilter.CURRENT, 1L));
+        assertThrows(NotFoundException.class, () -> bookingService.getUserBookings(StateFilter.CURRENT, 1L, 0, 20));
 
         verify(userStorage).existsById(1L);
     }
@@ -225,11 +226,11 @@ class BookingServiceImplTest {
     @Test
     void getUserBookings() {
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(bookingStorage.findAllBookingOrderByDateDesc(any())).thenReturn(List.of(getBooking(1L, BookStatus.APPROVED)));
+        when(bookingStorage.findAllBookingOrderByDateDesc(any(), anyInt(), anyInt())).thenReturn(List.of(getBooking(1L, BookStatus.APPROVED)));
 
-        bookingService.getUserBookings(StateFilter.CURRENT, bookerId);
+        bookingService.getUserBookings(StateFilter.CURRENT, bookerId, 0, 20);
 
-        verify(bookingStorage).findAllBookingOrderByDateDesc(any());
+        verify(bookingStorage).findAllBookingOrderByDateDesc(any(), anyInt(), anyInt());
     }
 
     @Test
@@ -237,7 +238,7 @@ class BookingServiceImplTest {
         when(itemStorage.count(any(BooleanExpression.class))).thenReturn(0L);
         BooleanExpression expected = QItem.item.owner.id.eq(1L);
 
-        assertThrows(NotFoundException.class, () -> bookingService.getOwnerBookings(StateFilter.CURRENT, 1L));
+        assertThrows(NotFoundException.class, () -> bookingService.getOwnerBookings(StateFilter.CURRENT, 1L, 0, 20));
 
         verify(itemStorage).count(expected);
     }
@@ -245,11 +246,11 @@ class BookingServiceImplTest {
     @Test
     void getOwnerBookings() {
         when(itemStorage.count(any(BooleanExpression.class))).thenReturn(1L);
-        when(bookingStorage.findAllBookingOrderByDateDesc(any(BooleanExpression.class)))
+        when(bookingStorage.findAllBookingOrderByDateDesc(any(BooleanExpression.class), anyInt(), anyInt()))
                 .thenReturn(List.of(getBooking(1L, BookStatus.APPROVED)));
 
-        bookingService.getOwnerBookings(StateFilter.CURRENT, 1L);
+        bookingService.getOwnerBookings(StateFilter.CURRENT, 1L, 0, 20);
 
-        verify(bookingStorage).findAllBookingOrderByDateDesc(any());
+        verify(bookingStorage).findAllBookingOrderByDateDesc(any(BooleanExpression.class), anyInt(), anyInt());
     }
 }

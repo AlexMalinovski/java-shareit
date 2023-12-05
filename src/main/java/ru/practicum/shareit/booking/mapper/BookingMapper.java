@@ -9,6 +9,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.user.mapper.UserMapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {UserMapper.class, ItemMapper.class})
 public interface BookingMapper {
 
@@ -21,6 +23,8 @@ public interface BookingMapper {
     @Mapping(target = "start", source = "booking.start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     @Mapping(target = "end", source = "booking.end", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     BookingDto mapBookingToBookingDto(Booking booking);
+
+    List<BookingDto> mapBookingToBookingDto(List<Booking> bookings);
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "booker", expression = "java(ru.practicum.shareit.user.model.User.builder().id(src.getBooker().getId()).build())")

@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -193,7 +194,7 @@ class ItemServiceImplTest {
     void getOwnedItems_ifUserNotFound_thenThrowNotFoundException() {
         when(userStorage.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> itemService.getOwnedItems(1L));
+        assertThrows(NotFoundException.class, () -> itemService.getOwnedItems(1L, 0, 10));
 
         verify(userStorage).existsById(1L);
     }
@@ -207,15 +208,16 @@ class ItemServiceImplTest {
                 .build();
         List<Comment> comments = new ArrayList<>();
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(itemStorage.findByOwner_IdOrderById(anyLong())).thenReturn(List.of(expectedItem));
+        when(itemStorage.findByConditionWithOrder(any(BooleanExpression.class), any(), anyInt(), anyInt()))
+                .thenReturn(List.of(expectedItem));
         when(commentStorage.findAllByItem_IdOrderByCreatedAsc(anyLong())).thenReturn(comments);
         when(bookingStorage.findTopOrderByTime(any(BooleanExpression.class), any())).thenReturn(Optional.empty());
 
-        var actual = itemService.getOwnedItems(user.getId());
+        var actual = itemService.getOwnedItems(user.getId(), 0, 10);
 
         expectedItem = expectedItem.toBuilder().comments(comments).build();
         verify(userStorage).existsById(user.getId());
-        verify(itemStorage).findByOwner_IdOrderById(user.getId());
+        verify(itemStorage).findByConditionWithOrder(QItem.item.owner.id.eq(user.getId()), QItem.item.id.asc(), 0, 10);
         assertNotNull(actual);
         assertEquals(1, actual.size());
         assertEquals(expectedItem, actual.get(0));
@@ -229,15 +231,15 @@ class ItemServiceImplTest {
                 .owner(user)
                 .build();
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(itemStorage.findAllByExpression(any(BooleanExpression.class))).thenReturn(List.of(expectedItem));
+        when(itemStorage.findByCondition(any(BooleanExpression.class), anyInt(), anyInt())).thenReturn(List.of(expectedItem));
         BooleanExpression byTextInNameOrDescription = QItem.item.name.containsIgnoreCase("abc")
                 .or(QItem.item.description.containsIgnoreCase("abc"));
         BooleanExpression byAvailableTrue = QItem.item.available.isTrue();
 
-        var actual = itemService.getAvailableItemsBySubString("abc", user.getId());
+        var actual = itemService.getAvailableItemsBySubString("abc", user.getId(), 0, 10);
 
         verify(userStorage).existsById(user.getId());
-        verify(itemStorage).findAllByExpression(byAvailableTrue.and(byTextInNameOrDescription));
+        verify(itemStorage).findByCondition(byAvailableTrue.and(byTextInNameOrDescription), 0, 10);
         assertNotNull(actual);
         assertEquals(1, actual.size());
         assertEquals(expectedItem, actual.get(0));
@@ -248,7 +250,7 @@ class ItemServiceImplTest {
         User user = getValidUser();
         when(userStorage.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> itemService.getAvailableItemsBySubString("abc", user.getId()));
+        assertThrows(NotFoundException.class, () -> itemService.getAvailableItemsBySubString("abc", user.getId(), 0, 10));
 
         verify(userStorage).existsById(user.getId());
     }
@@ -258,7 +260,7 @@ class ItemServiceImplTest {
         User user = getValidUser();
         when(userStorage.existsById(anyLong())).thenReturn(true);
 
-        var actual = itemService.getAvailableItemsBySubString("", user.getId());
+        var actual = itemService.getAvailableItemsBySubString("", user.getId(), 0, 10);
 
         verify(userStorage).existsById(user.getId());
         assertNotNull(actual);

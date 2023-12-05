@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -128,7 +130,7 @@ class ItemControllerTest {
     @Test
     void createItem_isAvailable() throws Exception {
         when(itemMapper.mapCreateItemDtoToItem(any())).thenReturn(getValidNewItem());
-        when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
+        when(itemMapper.mapItemToItemDto(any(Item.class))).thenReturn(getValidItemDto());
         when(itemService.setOwnerAndCreateItem(any(), anyLong())).thenReturn(getValidItem());
 
         mockMvc.perform(post("/items")
@@ -140,7 +142,7 @@ class ItemControllerTest {
 
     @Test
     void getItemById_isAvailable() throws Exception {
-        when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
+        when(itemMapper.mapItemToItemDto(any(Item.class))).thenReturn(getValidItemDto());
         when(itemService.getItemById(1L, 1L)).thenReturn(Optional.of(getValidItem()));
 
         mockMvc.perform(get("/items/1")
@@ -151,7 +153,7 @@ class ItemControllerTest {
     @Test
     void updateItem_isAvailable() throws Exception {
         when(itemMapper.mapUpdateItemDtoToItem(any())).thenReturn(getValidNewItem());
-        when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
+        when(itemMapper.mapItemToItemDto(any(Item.class))).thenReturn(getValidItemDto());
         when(itemService.checkOwnerAndUpdateItem(any(), anyLong())).thenReturn(getValidItem());
 
         mockMvc.perform(patch("/items/1")
@@ -163,22 +165,30 @@ class ItemControllerTest {
 
     @Test
     void getOwnedItems_isAvailable() throws Exception {
-        when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
-        when(itemService.getOwnedItems(1L)).thenReturn(List.of(getValidItem()));
+        when(itemMapper.mapItemToItemDto(anyList())).thenReturn(List.of(getValidItemDto()));
+        when(itemService.getOwnedItems(1L, 0, 10)).thenReturn(List.of(getValidItem()));
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1L))
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
+
+        verify(itemService).getOwnedItems(1L, 0, 10);
     }
 
     @Test
     void searchItems_isAvailable() throws Exception {
-        when(itemMapper.mapItemToItemDto(any())).thenReturn(getValidItemDto());
-        when(itemService.getAvailableItemsBySubString(anyString(), anyLong())).thenReturn(List.of(getValidItem()));
+        when(itemMapper.mapItemToItemDto(anyList())).thenReturn(List.of(getValidItemDto()));
+        when(itemService.getAvailableItemsBySubString(anyString(), anyLong(), anyInt(), anyInt())).thenReturn(List.of(getValidItem()));
 
         mockMvc.perform(get("/items/search?text=sometext")
-                        .header("X-Sharer-User-Id", 1L))
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
+
+        verify(itemService).getAvailableItemsBySubString("sometext", 1L, 0, 10);
     }
 
     @Test

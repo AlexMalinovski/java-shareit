@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.QItem;
 import ru.practicum.shareit.item.storage.CommentStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -31,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserStorage userStorage;
     private final BookingStorage bookingStorage;
-
+    private final ItemRequestStorage itemRequestStorage;
     private final CommentStorage commentStorage;
 
     @Override
@@ -40,6 +42,10 @@ public class ItemServiceImpl implements ItemService {
     public Item setOwnerAndCreateItem(@NonNull Item item, long userId) {
         User owner = userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Не найден пользователь с id=" + userId));
+        Long requestId = Optional.ofNullable(item.getRequest()).map(ItemRequest::getId).orElse(null);
+        if (requestId != null && !itemRequestStorage.existsById(requestId)) {
+            throw new NotFoundException(String.format("Запрос с id=%d не существует", requestId));
+        }
         return itemStorage.save(item.toBuilder()
                 .owner(owner)
                 .build());
@@ -98,12 +104,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @NonNull
     @Transactional(readOnly = true)
-    public List<Item> getOwnedItems(long userId) {
+    public List<Item> getOwnedItems(long userId, int from, int size) {
         if (!userStorage.existsById(userId)) {
             throw new NotFoundException("Не найден пользователь с id=" + userId);
         }
         final LocalDateTime now = LocalDateTime.now();
-        return itemStorage.findByOwner_IdOrderById(userId)
+        //return itemStorage.findByOwner_IdOrderById(userId)
+
+        BooleanExpression byOwnerId = QItem.item.owner.id.eq(userId);
+        return itemStorage.findByConditionWithOrder(byOwnerId, QItem.item.id.asc(), from, size)
                 .stream()
                 .map(item -> item.toBuilder()
                         .lastBooking(findLastItemBooking(item.getId(), now)
@@ -118,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @NonNull
     @Transactional(readOnly = true)
-    public List<Item> getAvailableItemsBySubString(@NonNull String text, long requesterId) {
+    public List<Item> getAvailableItemsBySubString(@NonNull String text, long requesterId, int from, int size) {
         if (!userStorage.existsById(requesterId)) {
                 throw  new NotFoundException("Не найден пользователь с id=" + requesterId);
         }
@@ -129,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
         BooleanExpression byTextInNameOrDescription = QItem.item.name.containsIgnoreCase(text)
                 .or(QItem.item.description.containsIgnoreCase(text));
         BooleanExpression byAvailableTrue = QItem.item.available.isTrue();
-        return itemStorage.findAllByExpression(byAvailableTrue.and(byTextInNameOrDescription));
+        return itemStorage.findByCondition(byAvailableTrue.and(byTextInNameOrDescription), from, size);
     }
 
     @Override

@@ -24,8 +24,8 @@ import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -101,17 +101,18 @@ public class BookingController {
      * @return List<BookingDto> отсортированный по дате от более новых к более старым
      */
     @GetMapping
-    public ResponseEntity<List<BookingDto>> getUserBookings(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                        @RequestParam(required = false, defaultValue = "ALL")
-                                                        String state) {
+    public ResponseEntity<List<BookingDto>> getUserBookings(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
         if (stateFilter == StateFilter.UNSUPPORTED) {
             throw new BadRequestParamException(String.format("Unknown state: %s", state));
         }
-        List<BookingDto> listDto = bookingService.getUserBookings(stateFilter, userId)
-                .stream()
-                .map(bookingMapper::mapBookingToBookingDto)
-                .collect(Collectors.toList());
+        List<BookingDto> listDto = bookingMapper.mapBookingToBookingDto(
+                bookingService.getUserBookings(stateFilter, userId, from, size));
 
         return ResponseEntity.ok(listDto);
     }
@@ -128,17 +129,18 @@ public class BookingController {
      * @return List<BookingDto>
      */
     @GetMapping("/owner")
-    public ResponseEntity<List<BookingDto>> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId,
-                                                        @RequestParam(required = false, defaultValue = "ALL")
-                                                        String state) {
+    public ResponseEntity<List<BookingDto>> getOwnerBookings(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId,
+            @RequestParam(required = false, defaultValue = "ALL") String state,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
         if (stateFilter == StateFilter.UNSUPPORTED) {
             throw new BadRequestParamException(String.format("Unknown state: %s", state));
         }
-        List<BookingDto> listDto = bookingService.getOwnerBookings(stateFilter, ownerId)
-                .stream()
-                .map(bookingMapper::mapBookingToBookingDto)
-                .collect(Collectors.toList());
+        List<BookingDto> listDto = bookingMapper.mapBookingToBookingDto(
+                bookingService.getOwnerBookings(stateFilter, ownerId, from, size));
 
         return ResponseEntity.ok(listDto);
     }

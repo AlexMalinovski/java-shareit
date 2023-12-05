@@ -12,14 +12,21 @@ import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface ItemMapper {
 
+    @Mapping(target = "request",
+            expression = "java(createItemDto.getRequestId() == null ? null : ru.practicum.shareit.request.model.ItemRequest.builder().id(createItemDto.getRequestId()).build())")
     Item mapCreateItemDtoToItem(CreateItemDto createItemDto);
 
     Item mapUpdateItemDtoToItem(UpdateItemDto updateItemDto);
 
+    @Mapping(target = "requestId", expression = "java(item.getRequest() == null ? null : item.getRequest().getId())")
     ItemDto mapItemToItemDto(Item item);
+
+    List<ItemDto> mapItemToItemDto(List<Item> items);
 
     @Mapping(target = "bookerId", expression = "java(booking.getBooker().getId())")
     @Mapping(target = "start", source = "start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")

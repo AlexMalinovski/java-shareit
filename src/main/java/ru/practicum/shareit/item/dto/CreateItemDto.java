@@ -18,4 +18,6 @@ public class CreateItemDto {
 
     @NotNull
     private final Boolean available;
+
+    private final Long requestId;
 }

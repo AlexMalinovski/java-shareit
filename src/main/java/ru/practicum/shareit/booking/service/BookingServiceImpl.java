@@ -102,19 +102,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getUserBookings(@NonNull StateFilter state, long userId) {
+    public List<Booking> getUserBookings(@NonNull StateFilter state, long userId, int from, int size) {
         if (!userStorage.existsById(userId)) {
             // требование ТЗ
             throw new NotFoundException(String.format("Не найден пользователь с id=%d.", userId));
         }
         BooleanExpression byState = state.getExpression(LocalDateTime.now());
         BooleanExpression byBookerId = QBooking.booking.booker.id.eq(userId);
-        return bookingStorage.findAllBookingOrderByDateDesc(byBookerId.and(byState));
+        return bookingStorage.findAllBookingOrderByDateDesc(byBookerId.and(byState), from, size);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getOwnerBookings(@NonNull StateFilter state, long ownerId) {
+    public List<Booking> getOwnerBookings(@NonNull StateFilter state, long ownerId, int from, int size) {
         BooleanExpression byOwnerId = QItem.item.owner.id.eq(ownerId);
         if (itemStorage.count(byOwnerId) == 0) {
             // требование ТЗ
@@ -122,6 +122,6 @@ public class BookingServiceImpl implements BookingService {
         }
         BooleanExpression byState = state.getExpression(LocalDateTime.now());
         byOwnerId = QBooking.booking.item.owner.id.eq(ownerId);
-        return bookingStorage.findAllBookingOrderByDateDesc(byOwnerId.and(byState));
+        return bookingStorage.findAllBookingOrderByDateDesc(byOwnerId.and(byState), from, size);
     }
 }

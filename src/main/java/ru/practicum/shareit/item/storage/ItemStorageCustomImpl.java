@@ -1,10 +1,12 @@
 package ru.practicum.shareit.item.storage;
 
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.QItem;
-import ru.practicum.shareit.user.model.QUser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,13 +18,28 @@ public class ItemStorageCustomImpl implements ItemStorageCustom {
     private EntityManager em;
 
     @Override
-    public List<Item> findAllByExpression(BooleanExpression expression) {
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        QItem qItem = QItem.item;
-        QUser owner = QUser.user;
-        return queryFactory.selectFrom(qItem)
-                .innerJoin(qItem.owner, owner).fetchJoin()
-                .where(expression)
+    public List<Item> findByCondition(BooleanExpression condition, int from, int size) {
+        return findBy(QItem.item, condition)
+                .limit(size)
+                .offset(from)
                 .fetch();
     }
+
+    @Override
+    public List<Item> findByConditionWithOrder(BooleanExpression condition, OrderSpecifier<Long> order, int from, int size) {
+        return findBy(QItem.item, condition)
+                .orderBy(order)
+                .limit(size)
+                .offset(from)
+                .fetch();
+    }
+
+    private <T> JPAQuery<T> findBy(Expression<T> expression, BooleanExpression condition) {
+        QItem qItem = QItem.item;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        return queryFactory.select(expression)
+                .from(qItem)
+                .where(condition);
+    }
+
 }

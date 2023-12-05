@@ -21,7 +21,7 @@ public class BookingStorageCustomImpl implements BookingStorageCustom {
     private EntityManager em;
 
     @Override
-    public List<Booking> findAllBookingOrderByDateDesc(BooleanExpression predicate) {
+    public List<Booking> findAllBookingOrderByDateDesc(BooleanExpression predicate, int from, int size) {
         QBooking booking = QBooking.booking;
         QUser booker = QUser.user;
         QItem item = QItem.item;
@@ -31,6 +31,8 @@ public class BookingStorageCustomImpl implements BookingStorageCustom {
                 .innerJoin(booking.item, item).fetchJoin()
                 .where(predicate)
                 .orderBy(booking.end.desc())
+                .limit(size)
+                .offset(from)
                 .fetch();
     }
 
