@@ -58,16 +58,9 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Не найден пользователь с id=" + requesterId);
         }
 
-        Item foundItem = itemStorage.findById(itemId).orElse(null);
-        if (foundItem == null) {
-            return Optional.empty();
-        }
-        List<Comment> comments = commentStorage.findAllByItem_IdOrderByCreatedAsc(itemId);
-        if (requesterId != foundItem.getOwner().getId()) {
-            return Optional.of(
-                    foundItem.toBuilder()
-                            .comments(comments)
-                            .build());
+        Item foundItem = itemStorage.findOneById(itemId).orElse(null);
+        if (foundItem == null || requesterId != foundItem.getOwner().getId()) {
+            return Optional.ofNullable(foundItem);
         }
 
         final LocalDateTime now = LocalDateTime.now();
@@ -75,7 +68,6 @@ public class ItemServiceImpl implements ItemService {
         final Booking nextBooking = findNextItemBooking(itemId, now).orElse(null);
         return Optional.of(
                 foundItem.toBuilder()
-                        .comments(comments)
                         .lastBooking(lastBooking)
                         .nextBooking(nextBooking)
                         .build());
@@ -109,17 +101,14 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Не найден пользователь с id=" + userId);
         }
         final LocalDateTime now = LocalDateTime.now();
-        //return itemStorage.findByOwner_IdOrderById(userId)
-
         BooleanExpression byOwnerId = QItem.item.owner.id.eq(userId);
-        return itemStorage.findByConditionWithOrder(byOwnerId, QItem.item.id.asc(), from, size)
+        return itemStorage.findByConditionWithCommentsOrder(byOwnerId, QItem.item.id.asc(), from, size)
                 .stream()
                 .map(item -> item.toBuilder()
                         .lastBooking(findLastItemBooking(item.getId(), now)
                                 .orElse(null))
                         .nextBooking(findNextItemBooking(item.getId(), now)
                                 .orElse(null))
-                        .comments(commentStorage.findAllByItem_IdOrderByCreatedAsc(item.getId()))
                         .build())
                 .collect(Collectors.toList());
     }

@@ -4,6 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.QItemRequest;
@@ -22,6 +23,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @NonNull
+    @Transactional
     public ItemRequest createItemRequest(@NonNull ItemRequest itemRequest, long userId) {
         if (!userStorage.existsById(userId)) {
             throw new NotFoundException(String.format("Не найден пользователь с id=%d.", userId));
@@ -49,7 +51,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException(String.format("Не найден пользователь с id=%d.", userId));
         }
         BooleanExpression byNotRequestAuthor = QItemRequest.itemRequest.user.id.eq(userId).not();
-//        PageRequest pageRequest = PageRequest.of(from, size);
         return itemRequestStorage.findAllFetchItemsPagination(
                 byNotRequestAuthor, QItemRequest.itemRequest.created.desc(), from, size);
     }

@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -39,14 +40,14 @@ public class ItemController {
      * Эндпойнт POST /items.
      * @param userId id пользователя, отправившего запрос (владелец вещи)
      * @param createItemDto CreateItemDto
-     * @return ItemDto
+     * @return ItemSimpleDto
      */
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+    public ResponseEntity<ItemSimpleDto> createItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
                                               @RequestBody @Valid CreateItemDto createItemDto) {
         final Item item = itemMapper.mapCreateItemDtoToItem(createItemDto);
         Item createdItem = itemService.setOwnerAndCreateItem(item, userId);
-        return ResponseEntity.ok(itemMapper.mapItemToItemDto(createdItem));
+        return ResponseEntity.ok(itemMapper.mapItemToItemSimpleDto(createdItem));
     }
 
     /**
@@ -111,15 +112,15 @@ public class ItemController {
      * Возвращает только доступные для аренды вещи.
      * @param userId id пользователя, отправившего запрос (любой)
      * @param text строка поиска
-     * @return List<ItemDto>
+     * @return List<ItemSimpleDto>
      */
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(
+    public ResponseEntity<List<ItemSimpleDto>> searchItems(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId, @RequestParam String text,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
             @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
 
-        List<ItemDto> items = itemMapper.mapItemToItemDto(
+        List<ItemSimpleDto> items = itemMapper.mapItemToItemSimpleDto(
                 itemService.getAvailableItemsBySubString(text, userId, from, size));
         return ResponseEntity.ok(items);
     }

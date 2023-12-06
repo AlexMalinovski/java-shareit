@@ -1,11 +1,10 @@
 package ru.practicum.shareit.item.storage;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.QComment;
 import ru.practicum.shareit.item.model.QItem;
 
 import javax.persistence.EntityManager;
@@ -19,27 +18,29 @@ public class ItemStorageCustomImpl implements ItemStorageCustom {
 
     @Override
     public List<Item> findByCondition(BooleanExpression condition, int from, int size) {
-        return findBy(QItem.item, condition)
+        QItem qItem = QItem.item;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        return queryFactory.selectFrom(qItem)
+                .where(condition)
                 .limit(size)
                 .offset(from)
                 .fetch();
     }
 
     @Override
-    public List<Item> findByConditionWithOrder(BooleanExpression condition, OrderSpecifier<Long> order, int from, int size) {
-        return findBy(QItem.item, condition)
+    public List<Item> findByConditionWithCommentsOrder(
+            BooleanExpression condition, OrderSpecifier<Long> order, int from, int size) {
+
+        QItem qItem = QItem.item;
+        QComment qComment = QComment.comment;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        return queryFactory.selectFrom(qItem)
+                .leftJoin(qItem.comments, qComment).fetchJoin()
+                .leftJoin(qComment.author).fetchJoin()
+                .where(condition)
                 .orderBy(order)
                 .limit(size)
                 .offset(from)
                 .fetch();
     }
-
-    private <T> JPAQuery<T> findBy(Expression<T> expression, BooleanExpression condition) {
-        QItem qItem = QItem.item;
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        return queryFactory.select(expression)
-                .from(qItem)
-                .where(condition);
-    }
-
 }

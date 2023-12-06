@@ -56,12 +56,8 @@ public class BookingStorageCustomImpl implements BookingStorageCustom {
     @Override
     public Optional<Booking> findTopOrderByTime(BooleanExpression predicate, OrderSpecifier<LocalDateTime> order) {
         QBooking booking = QBooking.booking;
-        QUser booker = QUser.user;
-        QItem item = QItem.item;
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         return queryFactory.selectFrom(booking)
-                .innerJoin(booking.booker, booker).fetchJoin()
-                .innerJoin(booking.item, item).fetchJoin()
                 .where(predicate)
                 .orderBy(order)
                 .limit(1L)

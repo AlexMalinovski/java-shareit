@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.mapper.EnumMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -122,6 +123,15 @@ class BookingControllerTest {
                 .build();
     }
 
+    private ItemSimpleDto getValidItemSimpleDto() {
+        return ItemSimpleDto.builder()
+                .id(itemId)
+                .name("name")
+                .description("description")
+                .available(true)
+                .build();
+    }
+
     private UserDto getValidOwnerDto() {
         return UserDto.builder()
                 .id(ownerId)
@@ -141,7 +151,7 @@ class BookingControllerTest {
     private BookingDto getBookingDto() {
         return BookingDto.builder()
                 .id(1L)
-                .item(getValidItemDto())
+                .item(getValidItemSimpleDto())
                 .booker(getValidBookerDto())
                 .status(BookStatus.WAITING.name())
                 .start(formatter.format(start))

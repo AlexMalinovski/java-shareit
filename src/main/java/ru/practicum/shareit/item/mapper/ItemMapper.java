@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -24,6 +25,10 @@ public interface ItemMapper {
     Item mapUpdateItemDtoToItem(UpdateItemDto updateItemDto);
 
     @Mapping(target = "requestId", expression = "java(item.getRequest() == null ? null : item.getRequest().getId())")
+    ItemSimpleDto mapItemToItemSimpleDto(Item item);
+
+    List<ItemSimpleDto> mapItemToItemSimpleDto(List<Item> item);
+
     ItemDto mapItemToItemDto(Item item);
 
     List<ItemDto> mapItemToItemDto(List<Item> items);

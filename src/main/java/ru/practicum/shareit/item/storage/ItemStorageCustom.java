@@ -9,5 +9,6 @@ import java.util.List;
 public interface ItemStorageCustom {
     List<Item> findByCondition(BooleanExpression condition, int from, int size);
 
-    List<Item> findByConditionWithOrder(BooleanExpression condition, OrderSpecifier<Long> order, int from, int size);
+    List<Item> findByConditionWithCommentsOrder(BooleanExpression condition, OrderSpecifier<Long> order, int from, int size);
+
 }

@@ -115,12 +115,12 @@ class ItemServiceImplTest {
     @Test
     void getItemById_ifItemNotFound_thenReturnEmpty() {
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(itemStorage.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemStorage.findOneById(anyLong())).thenReturn(Optional.empty());
 
         var actual = itemService.getItemById(2L, 1L);
 
         verify(userStorage).existsById(1L);
-        verify(itemStorage).findById(2L);
+        verify(itemStorage).findOneById(2L);
         assertNotNull(actual);
         assertTrue(actual.isEmpty());
     }
@@ -130,8 +130,7 @@ class ItemServiceImplTest {
         var expected = getValidItem();
         List<Comment> comments = new ArrayList<>();
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(itemStorage.findById(anyLong())).thenReturn(Optional.of(expected));
-        when(commentStorage.findAllByItem_IdOrderByCreatedAsc(anyLong())).thenReturn(comments);
+        when(itemStorage.findOneById(anyLong())).thenReturn(Optional.of(expected));
         when(bookingStorage.findTopOrderByTime(any(BooleanExpression.class), any())).thenReturn(Optional.empty());
 
 
@@ -139,8 +138,7 @@ class ItemServiceImplTest {
 
         expected = expected.toBuilder().comments(comments).build();
         verify(userStorage).existsById(1L);
-        verify(itemStorage).findById(1L);
-        verify(commentStorage).findAllByItem_IdOrderByCreatedAsc(expected.getId());
+        verify(itemStorage).findOneById(1L);
         assertNotNull(actual);
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -208,16 +206,15 @@ class ItemServiceImplTest {
                 .build();
         List<Comment> comments = new ArrayList<>();
         when(userStorage.existsById(anyLong())).thenReturn(true);
-        when(itemStorage.findByConditionWithOrder(any(BooleanExpression.class), any(), anyInt(), anyInt()))
+        when(itemStorage.findByConditionWithCommentsOrder(any(BooleanExpression.class), any(), anyInt(), anyInt()))
                 .thenReturn(List.of(expectedItem));
-        when(commentStorage.findAllByItem_IdOrderByCreatedAsc(anyLong())).thenReturn(comments);
         when(bookingStorage.findTopOrderByTime(any(BooleanExpression.class), any())).thenReturn(Optional.empty());
 
         var actual = itemService.getOwnedItems(user.getId(), 0, 10);
 
         expectedItem = expectedItem.toBuilder().comments(comments).build();
         verify(userStorage).existsById(user.getId());
-        verify(itemStorage).findByConditionWithOrder(QItem.item.owner.id.eq(user.getId()), QItem.item.id.asc(), 0, 10);
+        verify(itemStorage).findByConditionWithCommentsOrder(QItem.item.owner.id.eq(user.getId()), QItem.item.id.asc(), 0, 10);
         assertNotNull(actual);
         assertEquals(1, actual.size());
         assertEquals(expectedItem, actual.get(0));
