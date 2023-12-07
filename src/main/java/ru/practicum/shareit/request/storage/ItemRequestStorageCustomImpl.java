@@ -38,24 +38,20 @@ public class ItemRequestStorageCustomImpl implements ItemRequestStorageCustom {
 
     @Override
     public List<ItemRequest> findAllFetchItems(BooleanExpression condition, OrderSpecifier<LocalDateTime> order) {
-        return findByFetch(QItemRequest.itemRequest, condition).orderBy(order).fetch();
+        return findByFetch(QItemRequest.itemRequest, condition)
+                .orderBy(order)
+                .fetch();
     }
 
     @Override
     public List<ItemRequest> findAllFetchItemsPagination(BooleanExpression condition,
                                                          OrderSpecifier<LocalDateTime> order, int from, int size) {
-//        Long count = query(QItemRequest.itemRequest.count(), condition).fetchOne();
-//        Querydsl querydsl = new Querydsl(em, (new PathBuilderFactory()).create(ItemRequest.class));
-//        JPQLQuery<ItemRequest> queryPaged = querydsl
-//                .applyPagination(pageable, queryFetch(QItemRequest.itemRequest, condition).orderBy(order));
-//        return PageableExecutionUtils.getPage(queryPaged.fetch(), pageable, () -> count);
 
         return findByFetch(QItemRequest.itemRequest, condition)
                 .orderBy(order)
                 .limit(size)
                 .offset(from)
                 .fetch();
-
     }
 
     @Override

@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -47,4 +48,17 @@ public class ItemRequest {
 
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     private List<Item> items;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemRequest that = (ItemRequest) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
