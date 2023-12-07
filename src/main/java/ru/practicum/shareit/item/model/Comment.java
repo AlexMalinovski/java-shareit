@@ -24,9 +24,7 @@ import java.util.Objects;
 
 @NamedEntityGraph(
         name = "comment_fetch_author",
-        attributeNodes =
-                { @NamedAttributeNode("author") }
-)
+        attributeNodes = { @NamedAttributeNode("author") })
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
