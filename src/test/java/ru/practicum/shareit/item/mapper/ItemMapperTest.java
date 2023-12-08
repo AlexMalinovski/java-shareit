@@ -14,6 +14,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,6 +24,12 @@ class ItemMapperTest {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private final ItemMapper mapper = new ItemMapperImpl();
+
+    @Test
+    void mapCreateItemDtoToItem_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapCreateItemDtoToItem(null);
+        assertNull(actual);
+    }
 
     @Test
     void mapCreateItemDtoToItem() {
@@ -35,6 +42,12 @@ class ItemMapperTest {
         assertEquals(expected.getDescription(), actual.getDescription());
         assertEquals(expected.getAvailable(), actual.getAvailable());
         assertNull(actual.getId());
+    }
+
+    @Test
+    void mapUpdateItemDtoToItem_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapUpdateItemDtoToItem(null);
+        assertNull(actual);
     }
 
     @Test
@@ -51,6 +64,12 @@ class ItemMapperTest {
     }
 
     @Test
+    void mapItemToItemDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapItemToItemDto((Item) null);
+        assertNull(actual);
+    }
+
+    @Test
     void mapItemToItemDto() {
         Item expected = Item.builder().id(1L).name("name").description("descr").available(true).build();
 
@@ -61,6 +80,37 @@ class ItemMapperTest {
         assertEquals(expected.getDescription(), actual.getDescription());
         assertEquals(expected.getAvailable(), actual.isAvailable());
         assertEquals(expected.getId(), actual.getId());
+    }
+
+    @Test
+    void mapItemToItemDto_ifSrcListNull_thenTargetNull() {
+        var actual = mapper.mapItemToItemDto((List<Item>) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapItemToItemDto_List() {
+        List<Item> expected = List.of(Item.builder()
+                .id(1L)
+                .name("name")
+                .description("descr")
+                .available(true)
+                .build());
+
+        var actual = mapper.mapItemToItemDto(expected);
+
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals(expected.get(0).getDescription(), actual.get(0).getDescription());
+        assertEquals(expected.get(0).getAvailable(), actual.get(0).isAvailable());
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+    }
+
+    @Test
+    void mapItemToItemSimpleDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapItemToItemSimpleDto((Item) null);
+        assertNull(actual);
     }
 
     @Test
@@ -82,6 +132,40 @@ class ItemMapperTest {
         assertEquals(expected.getAvailable(), actual.isAvailable());
         assertEquals(expected.getRequest().getId(), actual.getRequestId());
 
+    }
+
+    @Test
+    void mapItemToItemSimpleDto_ifSrcListNull_thenTargetNull() {
+        var actual = mapper.mapItemToItemSimpleDto((List<Item>) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapItemToItemSimpleDto_List() {
+        List<Item> expected = List.of(Item.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .available(true)
+                .request(ItemRequest.builder().id(2L).build())
+                .build());
+
+        var actual = mapper.mapItemToItemSimpleDto(expected);
+
+        assertNotNull(actual);
+        assertEquals(1, expected.size());
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals(expected.get(0).getDescription(), actual.get(0).getDescription());
+        assertEquals(expected.get(0).getAvailable(), actual.get(0).isAvailable());
+        assertEquals(expected.get(0).getRequest().getId(), actual.get(0).getRequestId());
+
+    }
+
+    @Test
+    void mapBookingInfoToDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapBookingInfoToDto(null);
+        assertNull(actual);
     }
 
     @Test
@@ -108,6 +192,12 @@ class ItemMapperTest {
     }
 
     @Test
+    void mapCommentToCommentDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapCommentToCommentDto(null);
+        assertNull(actual);
+    }
+
+    @Test
     void mapCommentToCommentDto() {
         LocalDateTime date = LocalDateTime.of(2022, 1, 1, 0, 0, 0);
         Comment expected = Comment.builder()
@@ -125,6 +215,12 @@ class ItemMapperTest {
         assertEquals(expected.getAuthor().getName(), actual.getAuthorName());
         assertEquals(expected.getCreated().format(
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")), actual.getCreated());
+    }
+
+    @Test
+    void mapCreateCommentDtoToComment_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapCreateCommentDtoToComment(null);
+        assertNull(actual);
     }
 
     @Test

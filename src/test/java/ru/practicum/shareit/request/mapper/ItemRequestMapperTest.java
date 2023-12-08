@@ -32,6 +32,12 @@ class ItemRequestMapperTest {
     private ItemRequestMapperImpl mapper;
 
     @Test
+    void mapCreateItemRequestDtoToItemRequest_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapCreateItemRequestDtoToItemRequest(null);
+        assertNull(actual);
+    }
+
+    @Test
     void mapCreateItemRequestDtoToItemRequest() {
         CreateItemRequestDto expected = CreateItemRequestDto.builder().description("description").build();
 
@@ -43,6 +49,12 @@ class ItemRequestMapperTest {
         assertNull(actual.getId());
         assertNull(actual.getItems());
         assertNull(actual.getCreated());
+    }
+
+    @Test
+    void mapItemRequestToItemRequestDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapItemRequestToItemRequestDto((ItemRequest) null);
+        assertNull(actual);
     }
 
     @Test
@@ -68,4 +80,33 @@ class ItemRequestMapperTest {
         assertEquals(1, actual.getItems().size());
     }
 
+    @Test
+    void mapItemRequestToItemRequestDto_ifSrcListNull_thenTargetNull() {
+        var actual = mapper.mapItemRequestToItemRequestDto((List<ItemRequest>) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapItemRequestToItemRequestDto_List() {
+        LocalDateTime dateTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
+        List<Item> items = List.of(Item.builder().build());
+        when(itemMapper.mapItemToItemSimpleDto(anyList())).thenReturn(List.of(ItemSimpleDto.builder().build()));
+        List<ItemRequest> expected = List.of(ItemRequest.builder()
+                .id(1L)
+                .user(User.builder().build())
+                .description("description")
+                .items(items)
+                .created(dateTime)
+                .build());
+
+        var actual = mapper.mapItemRequestToItemRequestDto(expected);
+
+        assertNotNull(expected);
+        assertEquals(1, actual.size());
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+        assertEquals(expected.get(0).getDescription(), actual.get(0).getDescription());
+        assertEquals(expected.get(0).getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")), actual.get(0).getCreated());
+        assertNotNull(actual.get(0).getItems());
+        assertEquals(1, actual.get(0).getItems().size());
+    }
 }

@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,6 +64,12 @@ class BookingMapperTest {
     }
 
     @Test
+    void mapCreateBookingDtoToBooking_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapCreateBookingDtoToBooking(null);
+        assertNull(actual);
+    }
+
+    @Test
     void mapBookingToBookingDto() {
         LocalDateTime start = LocalDateTime.of(2022, 1, 1, 0, 0, 0);
         LocalDateTime end = LocalDateTime.of(2022, 1, 2, 0, 0, 0);
@@ -88,6 +95,53 @@ class BookingMapperTest {
         assertNotNull(actual.getItem());
         verify(userMapper).mapUserToUserDto(expected.getBooker());
         verify(itemMapper).mapItemToItemSimpleDto(expected.getItem());
+    }
+
+    @Test
+    void mapBookingToBookingDto_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapBookingToBookingDto((Booking) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapBookingToBookingDto_ifSrcListNull_thenTargetNull() {
+        var actual = mapper.mapBookingToBookingDto((List<Booking>) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapBookingToBookingDto_List() {
+        LocalDateTime start = LocalDateTime.of(2022, 1, 1, 0, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2022, 1, 2, 0, 0, 0);
+        List<Booking> expected = List.of(Booking.builder()
+                .id(1L)
+                .status(BookStatus.APPROVED)
+                .item(Item.builder().build())
+                .booker(User.builder().build())
+                .start(start)
+                .end(end)
+                .build());
+        when(userMapper.mapUserToUserDto(any())).thenReturn(UserDto.builder().build());
+        when(itemMapper.mapItemToItemSimpleDto(any(Item.class))).thenReturn(ItemSimpleDto.builder().build());
+
+        var actual = mapper.mapBookingToBookingDto(expected);
+
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+        assertEquals(expected.get(0).getStatus().name(), actual.get(0).getStatus());
+        assertEquals(expected.get(0).getStart().format(FORMATTER), actual.get(0).getStart());
+        assertEquals(expected.get(0).getEnd().format(FORMATTER), actual.get(0).getEnd());
+        assertNotNull(actual.get(0).getBooker());
+        assertNotNull(actual.get(0).getItem());
+        verify(userMapper).mapUserToUserDto(expected.get(0).getBooker());
+        verify(itemMapper).mapItemToItemSimpleDto(expected.get(0).getItem());
+    }
+
+    @Test
+    void mapBookingToNewBooking_ifSrcNull_thenTargetNull() {
+        var actual = mapper.mapBookingToNewBooking(null);
+        assertNull(actual);
     }
 
     @Test

@@ -1,11 +1,16 @@
 package ru.practicum.shareit.booking.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
-@Data
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
 @Builder
 public class BookingDto {
     private final Long id;

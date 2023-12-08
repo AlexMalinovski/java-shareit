@@ -19,13 +19,6 @@ public class ItemRequestStorageCustomImpl implements ItemRequestStorageCustom {
     @PersistenceContext
     private EntityManager em;
 
-    private <T> JPAQuery<T> findBy(Expression<T> expression, BooleanExpression condition) {
-        QItemRequest itemRequest = QItemRequest.itemRequest;
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        return queryFactory.select(expression)
-                .from(itemRequest)
-                .where(condition);
-    }
 
     private <T> JPAQuery<T> findByFetch(Expression<T> expression, BooleanExpression condition) {
         QItemRequest itemRequest = QItemRequest.itemRequest;

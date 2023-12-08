@@ -229,6 +229,20 @@ class BookingControllerTest {
     }
 
     @Test
+    void getUserBookings_ifInvalidStateFilter_thenCode400() throws Exception {
+        Booking booking = getBooking();
+        when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.UNSUPPORTED);
+
+        mockMvc.perform(get("/bookings?state=qwerty")
+                        .header("X-Sharer-User-Id", bookerId)
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+
+        verify(enumMapper).mapStringToStateFilter("qwerty");
+    }
+
+    @Test
     void getOwnerBookings() throws Exception {
         Booking booking = getBooking();
         when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.CURRENT);
