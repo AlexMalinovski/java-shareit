@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.mapper;
 
 import org.mapstruct.BeanMapping;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -9,7 +10,11 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.user.mapper.UserMapper;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, ItemMapper.class})
+import java.util.List;
+
+@Mapper(componentModel = "spring",
+        uses = {UserMapper.class, ItemMapper.class},
+        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface BookingMapper {
 
     @Mapping(target = "status", expression = "java(ru.practicum.shareit.booking.enums.BookStatus.WAITING)")
@@ -21,6 +26,8 @@ public interface BookingMapper {
     @Mapping(target = "start", source = "booking.start", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     @Mapping(target = "end", source = "booking.end", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
     BookingDto mapBookingToBookingDto(Booking booking);
+
+    List<BookingDto> mapBookingToBookingDto(List<Booking> bookings);
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "booker", expression = "java(ru.practicum.shareit.user.model.User.builder().id(src.getBooker().getId()).build())")

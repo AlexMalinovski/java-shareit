@@ -1,10 +1,11 @@
 package ru.practicum.shareit.item.storage;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.QComment;
 import ru.practicum.shareit.item.model.QItem;
-import ru.practicum.shareit.user.model.QUser;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,13 +17,30 @@ public class ItemStorageCustomImpl implements ItemStorageCustom {
     private EntityManager em;
 
     @Override
-    public List<Item> findAllByExpression(BooleanExpression expression) {
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    public List<Item> findByCondition(BooleanExpression condition, int from, int size) {
         QItem qItem = QItem.item;
-        QUser owner = QUser.user;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         return queryFactory.selectFrom(qItem)
-                .innerJoin(qItem.owner, owner).fetchJoin()
-                .where(expression)
+                .where(condition)
+                .limit(size)
+                .offset(from)
+                .fetch();
+    }
+
+    @Override
+    public List<Item> findByConditionWithCommentsOrder(
+            BooleanExpression condition, OrderSpecifier<Long> order, int from, int size) {
+
+        QItem qItem = QItem.item;
+        QComment qComment = QComment.comment;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        return queryFactory.selectFrom(qItem)
+                .leftJoin(qItem.comments, qComment).fetchJoin()
+                .leftJoin(qComment.author).fetchJoin()
+                .where(condition)
+                .orderBy(order)
+                .limit(size)
+                .offset(from)
                 .fetch();
     }
 }

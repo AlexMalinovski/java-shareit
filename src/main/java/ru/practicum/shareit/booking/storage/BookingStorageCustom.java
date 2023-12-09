@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingStorageCustom {
-    List<Booking> findAllBookingOrderByDateDesc(BooleanExpression expression);
+    List<Booking> findAllBookingOrderByDateDesc(BooleanExpression expression, int from, int size);
 
     Optional<Booking> findAny(BooleanExpression expression);
 

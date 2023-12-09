@@ -16,7 +16,7 @@ public interface BookingService {
 
     Booking checkOwnerAndApproveBooking(long bookingId, long ownerId, boolean approved);
 
-    List<Booking> getUserBookings(@NonNull StateFilter state, long userId);
+    List<Booking> getUserBookings(@NonNull StateFilter state, long userId, int from, int size);
 
-    List<Booking> getOwnerBookings(@NonNull StateFilter state, long ownerId);
+    List<Booking> getOwnerBookings(@NonNull StateFilter state, long ownerId, int from, int size);
 }

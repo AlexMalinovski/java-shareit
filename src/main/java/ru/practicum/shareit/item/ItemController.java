@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,20 +17,22 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CreateCommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
@@ -39,14 +42,14 @@ public class ItemController {
      * Эндпойнт POST /items.
      * @param userId id пользователя, отправившего запрос (владелец вещи)
      * @param createItemDto CreateItemDto
-     * @return ItemDto
+     * @return ItemSimpleDto
      */
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+    public ResponseEntity<ItemSimpleDto> createItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
                                               @RequestBody @Valid CreateItemDto createItemDto) {
         final Item item = itemMapper.mapCreateItemDtoToItem(createItemDto);
         Item createdItem = itemService.setOwnerAndCreateItem(item, userId);
-        return ResponseEntity.ok(itemMapper.mapItemToItemDto(createdItem));
+        return ResponseEntity.ok(itemMapper.mapItemToItemSimpleDto(createdItem));
     }
 
     /**
@@ -94,11 +97,13 @@ public class ItemController {
      * @return List<ItemDto>
      */
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getOwnedItems(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId) {
-        List<ItemDto> items = itemService.getOwnedItems(userId)
-                .stream()
-                .map(itemMapper::mapItemToItemDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ItemDto>> getOwnedItems(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
+        List<ItemDto> items = itemMapper.mapItemToItemDto(
+                itemService.getOwnedItems(userId, from, size));
         return ResponseEntity.ok(items);
     }
 
@@ -109,15 +114,16 @@ public class ItemController {
      * Возвращает только доступные для аренды вещи.
      * @param userId id пользователя, отправившего запрос (любой)
      * @param text строка поиска
-     * @return List<ItemDto>
+     * @return List<ItemSimpleDto>
      */
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                     @RequestParam String text) {
-        List<ItemDto> items = itemService.getAvailableItemsBySubString(text, userId)
-                .stream()
-                .map(itemMapper::mapItemToItemDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ItemSimpleDto>> searchItems(
+            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId, @RequestParam String text,
+            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
+            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+
+        List<ItemSimpleDto> items = itemMapper.mapItemToItemSimpleDto(
+                itemService.getAvailableItemsBySubString(text, userId, from, size));
         return ResponseEntity.ok(items);
     }
 

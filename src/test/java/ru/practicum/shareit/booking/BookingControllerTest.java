@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.mapper.EnumMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -27,6 +28,8 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -120,6 +123,15 @@ class BookingControllerTest {
                 .build();
     }
 
+    private ItemSimpleDto getValidItemSimpleDto() {
+        return ItemSimpleDto.builder()
+                .id(itemId)
+                .name("name")
+                .description("description")
+                .available(true)
+                .build();
+    }
+
     private UserDto getValidOwnerDto() {
         return UserDto.builder()
                 .id(ownerId)
@@ -139,7 +151,7 @@ class BookingControllerTest {
     private BookingDto getBookingDto() {
         return BookingDto.builder()
                 .id(1L)
-                .item(getValidItemDto())
+                .item(getValidItemSimpleDto())
                 .booker(getValidBookerDto())
                 .status(BookStatus.WAITING.name())
                 .start(formatter.format(start))
@@ -202,31 +214,49 @@ class BookingControllerTest {
     void getUserBookings() throws Exception {
         Booking booking = getBooking();
         when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.CURRENT);
-        when(bookingService.getUserBookings(any(StateFilter.class), anyLong())).thenReturn(List.of(booking));
-        when(bookingMapper.mapBookingToBookingDto(any(Booking.class))).thenReturn(getBookingDto());
+        when(bookingService.getUserBookings(any(StateFilter.class), anyLong(), anyInt(), anyInt())).thenReturn(List.of(booking));
+        when(bookingMapper.mapBookingToBookingDto(anyList())).thenReturn(List.of(getBookingDto()));
 
         mockMvc.perform(get("/bookings?state=current")
-                        .header("X-Sharer-User-Id", bookerId))
+                        .header("X-Sharer-User-Id", bookerId)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
 
         verify(enumMapper).mapStringToStateFilter("current");
-        verify(bookingService).getUserBookings(StateFilter.CURRENT, bookerId);
-        verify(bookingMapper).mapBookingToBookingDto(booking);
+        verify(bookingService).getUserBookings(StateFilter.CURRENT, bookerId, 0, 10);
+        verify(bookingMapper).mapBookingToBookingDto(List.of(booking));
+    }
+
+    @Test
+    void getUserBookings_ifInvalidStateFilter_thenCode400() throws Exception {
+        Booking booking = getBooking();
+        when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.UNSUPPORTED);
+
+        mockMvc.perform(get("/bookings?state=qwerty")
+                        .header("X-Sharer-User-Id", bookerId)
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+
+        verify(enumMapper).mapStringToStateFilter("qwerty");
     }
 
     @Test
     void getOwnerBookings() throws Exception {
         Booking booking = getBooking();
         when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.CURRENT);
-        when(bookingService.getOwnerBookings(any(StateFilter.class), anyLong())).thenReturn(List.of(booking));
-        when(bookingMapper.mapBookingToBookingDto(any(Booking.class))).thenReturn(getBookingDto());
+        when(bookingService.getOwnerBookings(any(StateFilter.class), anyLong(), anyInt(), anyInt())).thenReturn(List.of(booking));
+        when(bookingMapper.mapBookingToBookingDto(anyList())).thenReturn(List.of(getBookingDto()));
 
         mockMvc.perform(get("/bookings/owner?state=current")
-                        .header("X-Sharer-User-Id", ownerId))
+                        .header("X-Sharer-User-Id", ownerId)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
 
         verify(enumMapper).mapStringToStateFilter("current");
-        verify(bookingService).getOwnerBookings(StateFilter.CURRENT, ownerId);
-        verify(bookingMapper).mapBookingToBookingDto(booking);
+        verify(bookingService).getOwnerBookings(StateFilter.CURRENT, ownerId, 0, 10);
+        verify(bookingMapper).mapBookingToBookingDto(List.of(booking));
     }
 }

@@ -17,10 +17,10 @@ public interface ItemService {
     Item checkOwnerAndUpdateItem(@NonNull Item itemUpdates, long userId);
 
     @NonNull
-    List<Item> getOwnedItems(long userId);
+    List<Item> getOwnedItems(long userId, int from, int size);
 
     @NonNull
-    List<Item> getAvailableItemsBySubString(@NonNull String text, long requesterId);
+    List<Item> getAvailableItemsBySubString(@NonNull String text, long requesterId, int from, int size);
 
     @NonNull
     Comment checkAuthorItemAndCreateComment(long userId, long itemId, @NonNull Comment comment);

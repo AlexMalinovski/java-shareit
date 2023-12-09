@@ -1,11 +1,15 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
 @Builder
 public class ItemDto {
     private final long id;
@@ -15,4 +19,5 @@ public class ItemDto {
     private final BookingInfoDto lastBooking;
     private final BookingInfoDto nextBooking;
     private final List<CommentDto> comments;
+//    private final Long requestId;
 }

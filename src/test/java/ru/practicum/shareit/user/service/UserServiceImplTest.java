@@ -156,4 +156,29 @@ class UserServiceImplTest {
         assertNotNull(actual);
         assertEquals(expected, actual);
     }
+
+    @Test
+    void deleteUser_ifUserNotFound_thenReturnOptionalEmpty() {
+        when(userStorage.findById(anyLong())).thenReturn(Optional.empty());
+
+        var actual = userService.deleteUser(1L);
+
+        assertNotNull(actual);
+        assertTrue(actual.isEmpty());
+        verify(userStorage).findById(1L);
+    }
+
+    @Test
+    void deleteUser_ifInvoked_thenDeleteUser() {
+        User expected = User.builder().build();
+        when(userStorage.findById(anyLong())).thenReturn(Optional.of(expected));
+
+        var actual = userService.deleteUser(1L);
+
+        assertNotNull(actual);
+        assertTrue(actual.isPresent());
+        verify(userStorage).findById(1L);
+        verify(userStorage).deleteById(1L);
+        assertEquals(expected, actual.get());
+    }
 }
