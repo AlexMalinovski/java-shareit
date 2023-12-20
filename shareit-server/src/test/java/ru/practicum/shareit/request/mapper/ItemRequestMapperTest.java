@@ -5,11 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.item.dto.ItemSimpleDto;
+import ru.practicum.shareit.library.api.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.mapper.ItemMapperImpl;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.dto.CreateItemRequestDto;
-import ru.practicum.shareit.request.mapper.ItemRequestMapperImpl;
+import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 

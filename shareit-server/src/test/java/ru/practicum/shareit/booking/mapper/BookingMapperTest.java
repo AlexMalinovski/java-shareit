@@ -5,14 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.library.api.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.booking.enums.BookStatus;
-import ru.practicum.shareit.booking.mapper.BookingMapperImpl;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.ItemSimpleDto;
+import ru.practicum.shareit.library.api.item.dto.ItemSimpleDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.library.api.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -82,7 +81,7 @@ class BookingMapperTest {
                 .start(start)
                 .end(end)
                 .build();
-        when(userMapper.mapUserToUserDto(any())).thenReturn(UserDto.builder().build());
+        when(userMapper.mapUserToUserDto(any(User.class))).thenReturn(UserDto.builder().build());
         when(itemMapper.mapItemToItemSimpleDto(any(Item.class))).thenReturn(ItemSimpleDto.builder().build());
 
         var actual = mapper.mapBookingToBookingDto(expected);
@@ -122,7 +121,7 @@ class BookingMapperTest {
                 .start(start)
                 .end(end)
                 .build());
-        when(userMapper.mapUserToUserDto(any())).thenReturn(UserDto.builder().build());
+        when(userMapper.mapUserToUserDto(any(User.class))).thenReturn(UserDto.builder().build());
         when(itemMapper.mapItemToItemSimpleDto(any(Item.class))).thenReturn(ItemSimpleDto.builder().build());
 
         var actual = mapper.mapBookingToBookingDto(expected);

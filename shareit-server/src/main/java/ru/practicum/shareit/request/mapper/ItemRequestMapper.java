@@ -4,8 +4,8 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.request.dto.CreateItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
+import ru.practicum.shareit.library.api.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;

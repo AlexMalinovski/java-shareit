@@ -1,11 +1,9 @@
 package ru.practicum.shareit.user.mapper;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.user.dto.CreateUserDto;
-import ru.practicum.shareit.user.dto.UpdateUserDto;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.mapper.UserMapperImpl;
+import ru.practicum.shareit.library.api.user.dto.CreateUserDto;
+import ru.practicum.shareit.library.api.user.dto.UpdateUserDto;
+import ru.practicum.shareit.library.api.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +52,7 @@ class UserMapperTest {
 
     @Test
     void mapUserToUserDto_ifSrcNull_thenTargetNull() {
-        var actual = mapper.mapUserToUserDto(null);
+        var actual = mapper.mapUserToUserDto((User) null);
         assertNull(actual);
     }
 
