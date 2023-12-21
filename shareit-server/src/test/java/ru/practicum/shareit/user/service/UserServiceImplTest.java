@@ -6,10 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.ConflictException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserServiceImpl;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.List;

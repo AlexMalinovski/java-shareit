@@ -6,7 +6,7 @@
 	<modules>
 		<module>shareit-server</module>
 		<module>shareit-gateway</module>
-        <module>shareit-lib-api</module>
+        <module>shareit-api-spring-boot-starter</module>
     </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

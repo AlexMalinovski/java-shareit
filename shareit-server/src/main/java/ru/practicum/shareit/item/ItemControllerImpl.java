@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -61,7 +61,7 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getOwnedItems(
+    public ResponseEntity<Object> getOwnedItems(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
             @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
@@ -72,7 +72,7 @@ public class ItemControllerImpl implements ItemController {
     }
 
     @Override
-    public ResponseEntity<List<?>> searchItems(
+    public ResponseEntity<Object> searchItems(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId, @RequestParam String text,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
             @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {

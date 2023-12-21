@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.library.api.request.ItemRequestController;
 import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
@@ -41,7 +41,7 @@ public class ItemRequestControllerImpl implements ItemRequestController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getOwnedItemRequests(
+    public ResponseEntity<Object> getOwnedItemRequests(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId) {
 
         List<ItemRequest> requests = itemRequestService.getOwnedItemRequests(ownerId);
@@ -49,7 +49,7 @@ public class ItemRequestControllerImpl implements ItemRequestController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getItemRequests(
+    public ResponseEntity<Object> getItemRequests(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
             @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {

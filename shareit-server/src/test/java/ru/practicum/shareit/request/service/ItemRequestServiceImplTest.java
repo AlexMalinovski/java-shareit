@@ -6,10 +6,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.QItemRequest;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.storage.UserStorage;
 

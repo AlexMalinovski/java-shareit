@@ -56,7 +56,7 @@
         </dependency>
         <dependency>
             <groupId>ru.practicum</groupId>
-            <artifactId>shareit-lib-api</artifactId>
+            <artifactId>shareit-api-spring-boot-starter</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

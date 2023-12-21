@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.QItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;

@@ -13,8 +13,8 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.mapper.EnumMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.BadRequestParamException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.BadRequestParamException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.library.api.booking.BookingController;
 import ru.practicum.shareit.library.api.booking.dto.BookingDto;
 import ru.practicum.shareit.library.api.booking.dto.CreateBookingDto;
@@ -63,7 +63,7 @@ public class BookingControllerImpl implements BookingController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getUserBookings(
+    public ResponseEntity<Object> getUserBookings(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
@@ -80,7 +80,7 @@ public class BookingControllerImpl implements BookingController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getOwnerBookings(
+    public ResponseEntity<Object> getOwnerBookings(
             @RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
             @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,

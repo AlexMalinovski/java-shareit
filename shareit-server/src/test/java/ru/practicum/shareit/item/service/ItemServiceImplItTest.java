@@ -4,9 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exception;
+package ru.practicum.shareit.library.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @ControllerAdvice
-public class AppExceptionHandler extends ResponseEntityExceptionHandler {
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<Object> notFoundExceptionHandler(NotFoundException ex, WebRequest request) {

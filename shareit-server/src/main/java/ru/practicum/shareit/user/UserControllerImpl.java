@@ -6,7 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.library.api.user.UserController;
 import ru.practicum.shareit.library.api.user.dto.CreateUserDto;
 import ru.practicum.shareit.library.api.user.dto.UpdateUserDto;
@@ -41,7 +41,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<List<?>> getAllUsers() {
+    public ResponseEntity<Object> getAllUsers() {
         List<UserDto> users = userMapper.mapUserToUserDto(userService.getAllUsers());
         return ResponseEntity.ok(users);
     }

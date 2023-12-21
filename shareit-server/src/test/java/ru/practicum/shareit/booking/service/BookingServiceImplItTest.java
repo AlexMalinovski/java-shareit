@@ -6,9 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.booking.enums.BookStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.BadRequestException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 

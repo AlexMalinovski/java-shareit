@@ -5,8 +5,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.library.api.exception.ConflictException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
