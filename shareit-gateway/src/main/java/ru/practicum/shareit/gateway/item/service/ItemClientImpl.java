@@ -1,15 +1,14 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.gateway.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.client.BaseClient;
-import ru.practicum.shareit.library.api.item.ItemController;
+import ru.practicum.shareit.gateway.client.BaseClient;
 import ru.practicum.shareit.library.api.item.dto.CreateCommentDto;
 import ru.practicum.shareit.library.api.item.dto.CreateItemDto;
 import ru.practicum.shareit.library.api.item.dto.UpdateItemDto;
@@ -19,13 +18,13 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Map;
 
-@RestController
+@Service
 @Validated
-public class ItemClient extends BaseClient implements ItemController {
+public class ItemClientImpl extends BaseClient implements ItemClient {
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ItemClientImpl(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))

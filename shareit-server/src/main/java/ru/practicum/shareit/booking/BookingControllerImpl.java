@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -13,21 +12,17 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.mapper.EnumMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.library.api.exception.BadRequestParamException;
-import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.library.api.booking.BookingController;
 import ru.practicum.shareit.library.api.booking.dto.BookingDto;
 import ru.practicum.shareit.library.api.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.library.api.exception.BadRequestParamException;
+import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Validated
 public class BookingControllerImpl implements BookingController {
 
     private final EnumMapper enumMapper;
@@ -35,8 +30,9 @@ public class BookingControllerImpl implements BookingController {
     private final BookingService bookingService;
 
     @Override
-    public ResponseEntity<Object> createBookingRequest(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                           @RequestBody @Valid CreateBookingDto createBookingDto) {
+    public ResponseEntity<Object> createBookingRequest(
+            @RequestHeader("X-Sharer-User-Id") long userId, @RequestBody CreateBookingDto createBookingDto) {
+
         Booking booking = bookingMapper.mapCreateBookingDtoToBooking(createBookingDto)
                 .toBuilder()
                 .booker(User.builder().id(userId).build())
@@ -46,16 +42,17 @@ public class BookingControllerImpl implements BookingController {
     }
 
     @Override
-    public ResponseEntity<Object> approveBooking(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId,
-                                                     @PathVariable @Valid @Positive long bookingId,
-                                                     @RequestParam boolean approved) {
+    public ResponseEntity<Object> approveBooking(
+            @RequestHeader("X-Sharer-User-Id") long ownerId, @PathVariable long bookingId, @RequestParam boolean approved) {
+
         final Booking booking = bookingService.checkOwnerAndApproveBooking(bookingId, ownerId, approved);
         return ResponseEntity.ok(bookingMapper.mapBookingToBookingDto(booking));
     }
 
     @Override
-    public ResponseEntity<Object> getBookingById(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                     @PathVariable @Valid @Positive long bookingId) {
+    public ResponseEntity<Object> getBookingById(
+            @RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long bookingId) {
+
         final Booking booking = bookingService.getBookingById(bookingId, userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Не найдено бронирование с id=%d.", bookingId)));
         return ResponseEntity.ok(bookingMapper.mapBookingToBookingDto(booking));
@@ -64,10 +61,10 @@ public class BookingControllerImpl implements BookingController {
 
     @Override
     public ResponseEntity<Object> getUserBookings(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
+            @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
-            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
-            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "20") int size) {
 
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
         if (stateFilter == StateFilter.UNSUPPORTED) {
@@ -81,10 +78,10 @@ public class BookingControllerImpl implements BookingController {
 
     @Override
     public ResponseEntity<Object> getOwnerBookings(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId,
+            @RequestHeader("X-Sharer-User-Id") long ownerId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
-            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
-            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size) {
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "20") int size) {
 
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
         if (stateFilter == StateFilter.UNSUPPORTED) {

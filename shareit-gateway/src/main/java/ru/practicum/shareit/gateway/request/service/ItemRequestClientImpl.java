@@ -1,15 +1,14 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.gateway.request.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.client.BaseClient;
-import ru.practicum.shareit.library.api.request.ItemRequestController;
+import ru.practicum.shareit.gateway.client.BaseClient;
 import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
 
 import javax.validation.Valid;
@@ -17,13 +16,13 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Map;
 
-@RestController
+@Service
 @Validated
-public class ItemRequestClient extends BaseClient implements ItemRequestController {
+public class ItemRequestClientImpl extends BaseClient implements ItemRequestClient {
     private static final String API_PREFIX = "/requests";
 
     @Autowired
-    public ItemRequestClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ItemRequestClientImpl(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -33,9 +32,7 @@ public class ItemRequestClient extends BaseClient implements ItemRequestControll
     }
 
     @Override
-    public ResponseEntity<Object> createItemRequest(
-            @Valid @Positive long userId,
-            @Valid CreateItemRequestDto dto) {
+    public ResponseEntity<Object> createItemRequest(@Valid @Positive long userId, @Valid CreateItemRequestDto dto) {
         return post("", userId, dto);
     }
 
@@ -46,9 +43,8 @@ public class ItemRequestClient extends BaseClient implements ItemRequestControll
 
     @Override
     public ResponseEntity<Object> getItemRequests(
-            @Valid @Positive long userId,
-            @Valid @PositiveOrZero int from,
-            @Valid @Positive int size) {
+            @Valid @Positive long userId, @Valid @PositiveOrZero int from, @Valid @Positive int size) {
+
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size
@@ -57,9 +53,7 @@ public class ItemRequestClient extends BaseClient implements ItemRequestControll
     }
 
     @Override
-    public ResponseEntity<Object> getItemRequestById(
-            @Valid @Positive long userId,
-            @Valid @Positive long requestId) {
+    public ResponseEntity<Object> getItemRequestById(@Valid @Positive long userId, @Valid @Positive long requestId) {
         return get(String.format("/%d", requestId), userId);
     }
 }

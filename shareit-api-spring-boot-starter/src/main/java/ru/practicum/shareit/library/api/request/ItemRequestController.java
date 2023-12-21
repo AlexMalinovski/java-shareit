@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 
 @RequestMapping(path = "/requests")
 public interface ItemRequestController {
@@ -27,8 +25,7 @@ public interface ItemRequestController {
      */
     @PostMapping
     ResponseEntity<Object> createItemRequest(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-            @RequestBody @Valid CreateItemRequestDto dto);
+            @RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid CreateItemRequestDto dto);
 
     /**
      * Получить список своих запросов вместе с данными об ответах на них.
@@ -38,8 +35,7 @@ public interface ItemRequestController {
      * @return List<ItemRequestDto>
      */
     @GetMapping
-    ResponseEntity<Object> getOwnedItemRequests(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long ownerId);
+    ResponseEntity<Object> getOwnedItemRequests(@RequestHeader("X-Sharer-User-Id") long ownerId);
 
     /**
      * Получить список запросов, созданных другими пользователями.
@@ -55,9 +51,9 @@ public interface ItemRequestController {
      */
     @GetMapping("/all")
     ResponseEntity<Object> getItemRequests(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
-            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size);
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "20") int size);
 
     /**
      * Получить данные об одном конкретном запросе вместе с данными об ответах на него
@@ -68,6 +64,6 @@ public interface ItemRequestController {
      * @return ItemRequestDto
      */
     @GetMapping("/{requestId}")
-    ResponseEntity<Object> getItemRequestById(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                                      @PathVariable @Valid @Positive long requestId);
+    ResponseEntity<Object> getItemRequestById(
+            @RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long requestId);
 }

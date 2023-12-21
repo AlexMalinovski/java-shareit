@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.practicum.shareit.library.api.user.dto.CreateUserDto;
 import ru.practicum.shareit.library.api.user.dto.UpdateUserDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-
 @RequestMapping(path = "/users")
 public interface UserController {
 
@@ -25,7 +22,7 @@ public interface UserController {
      * @return UserDto добавленного пользователя
      */
     @PostMapping
-    ResponseEntity<Object> createUser(@RequestBody @Valid CreateUserDto createUserDto);
+    ResponseEntity<Object> createUser(@RequestBody CreateUserDto createUserDto);
 
     /**
      * Просмотр информации о конкретном пользователе по его идентификатору.
@@ -35,7 +32,7 @@ public interface UserController {
      * @return UserDto
      */
     @GetMapping("/{id}")
-    ResponseEntity<Object> getUserById(@PathVariable @Valid @Positive long id);
+    ResponseEntity<Object> getUserById(@PathVariable long id);
 
     /**
      * Просмотр списка всех пользователей.
@@ -55,8 +52,7 @@ public interface UserController {
      * @return UserDto обновлённого пользователя
      */
     @PatchMapping("/{id}")
-    ResponseEntity<Object> updateUser(@PathVariable @Valid @Positive long id,
-                                       @RequestBody @Valid UpdateUserDto updateUserDto);
+    ResponseEntity<Object> updateUser(@PathVariable long id, @RequestBody UpdateUserDto updateUserDto);
 
     /**
      * Удаление пользователя.
@@ -66,5 +62,5 @@ public interface UserController {
      * @return UserDto удалённого пользователя
      */
     @DeleteMapping("/{id}")
-    ResponseEntity<Object> deleteUser(@PathVariable @Valid @Positive long id);
+    ResponseEntity<Object> deleteUser(@PathVariable long id);
 }

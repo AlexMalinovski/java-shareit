@@ -13,10 +13,6 @@ import ru.practicum.shareit.library.api.item.dto.CreateCommentDto;
 import ru.practicum.shareit.library.api.item.dto.CreateItemDto;
 import ru.practicum.shareit.library.api.item.dto.UpdateItemDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-
 @RequestMapping("/items")
 public interface ItemController {
     /**
@@ -28,8 +24,8 @@ public interface ItemController {
      * @return ItemSimpleDto
      */
     @PostMapping
-    ResponseEntity<Object> createItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                             @RequestBody @Valid CreateItemDto createItemDto);
+    ResponseEntity<Object> createItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                                      @RequestBody CreateItemDto createItemDto);
 
     /**
      * Просмотр информации о конкретной вещи по её идентификатору.
@@ -41,8 +37,8 @@ public interface ItemController {
      * @return ItemDto
      */
     @GetMapping("/{itemId}")
-    ResponseEntity<Object> getItemById(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                        @PathVariable @Valid @Positive long itemId);
+    ResponseEntity<Object> getItemById(@RequestHeader("X-Sharer-User-Id") long userId,
+                                       @PathVariable long itemId);
 
     /**
      * Редактирование вещи.
@@ -56,9 +52,9 @@ public interface ItemController {
      * @return ItemDto
      */
     @PatchMapping("/{itemId}")
-    ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                       @PathVariable @Valid @Positive long itemId,
-                                       @RequestBody UpdateItemDto updateItemDto);
+    ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                                      @PathVariable long itemId,
+                                      @RequestBody UpdateItemDto updateItemDto);
 
     /**
      * Просмотр владельцем списка всех его вещей с указанием названия и описания для каждой.
@@ -69,9 +65,9 @@ public interface ItemController {
      */
     @GetMapping
     ResponseEntity<Object> getOwnedItems(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
-            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size);
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "20") int size);
 
     /**
      * Поиск вещи потенциальным арендатором.
@@ -85,9 +81,10 @@ public interface ItemController {
      */
     @GetMapping("/search")
     ResponseEntity<Object> searchItems(
-            @RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId, @RequestParam String text,
-            @RequestParam(required = false, defaultValue = "0") @Valid @PositiveOrZero int from,
-            @RequestParam(required = false, defaultValue = "20") @Valid @Positive int size);
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam String text,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "20") int size);
 
     /**
      * Добавление комментария.
@@ -99,7 +96,7 @@ public interface ItemController {
      * @return CommentDto
      */
     @PostMapping("/{itemId}/comment")
-    ResponseEntity<Object> createComment(@RequestHeader("X-Sharer-User-Id") @Valid @Positive long userId,
-                                             @PathVariable @Valid @Positive long itemId,
-                                             @RequestBody @Valid CreateCommentDto createCommentDto);
+    ResponseEntity<Object> createComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                         @PathVariable long itemId,
+                                         @RequestBody CreateCommentDto createCommentDto);
 }

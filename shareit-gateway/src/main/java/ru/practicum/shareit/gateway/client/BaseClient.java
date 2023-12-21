@@ -1,4 +1,4 @@
-package ru.practicum.shareit.client;
+package ru.practicum.shareit.gateway.client;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
