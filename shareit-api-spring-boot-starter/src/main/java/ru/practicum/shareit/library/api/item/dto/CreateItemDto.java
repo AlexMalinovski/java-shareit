@@ -8,6 +8,7 @@ import lombok.extern.jackson.Jacksonized;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @Getter
@@ -17,9 +18,11 @@ import javax.validation.constraints.NotNull;
 public class CreateItemDto {
 
     @NotBlank
+    @Size(max = 255)
     private final String name;
 
     @NotBlank
+    @Size(max = 512)
     private final String description;
 
     @NotNull

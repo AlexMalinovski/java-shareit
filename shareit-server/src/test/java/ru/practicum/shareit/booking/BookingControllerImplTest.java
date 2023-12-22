@@ -187,10 +187,8 @@ class BookingControllerImplTest {
 
         mockMvc.perform(patch("/bookings/1?approved=true")
                         .header("X-Sharer-User-Id", ownerId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(getCreateBookingDto())))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
 
         verify(bookingService).checkOwnerAndApproveBooking(1L, ownerId, true);
         verify(bookingMapper).mapBookingToBookingDto(booking);
@@ -226,20 +224,6 @@ class BookingControllerImplTest {
         verify(enumMapper).mapStringToStateFilter("current");
         verify(bookingService).getUserBookings(StateFilter.CURRENT, bookerId, 0, 10);
         verify(bookingMapper).mapBookingToBookingDto(List.of(booking));
-    }
-
-    @Test
-    void getUserBookings_ifInvalidStateFilter_thenCode400() throws Exception {
-        Booking booking = getBooking();
-        when(enumMapper.mapStringToStateFilter(anyString())).thenReturn(StateFilter.UNSUPPORTED);
-
-        mockMvc.perform(get("/bookings?state=qwerty")
-                        .header("X-Sharer-User-Id", bookerId)
-                        .param("from", "0")
-                        .param("size", "10"))
-                .andExpect(status().isBadRequest());
-
-        verify(enumMapper).mapStringToStateFilter("qwerty");
     }
 
     @Test

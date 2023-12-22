@@ -10,16 +10,22 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.gateway.client.BaseClient;
 import ru.practicum.shareit.library.api.booking.dto.CreateBookingDto;
+import ru.practicum.shareit.library.api.exception.BadRequestParamException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Validated
 public class BookingClientImpl extends BaseClient implements BookingClient {
     private static final String API_PREFIX = "/bookings";
+
+    private static final Pattern STATE_FILTER_PATTERN =
+            Pattern.compile("^(ALL|CURRENT|PAST|FUTURE|WAITING|REJECTED)$", Pattern.CASE_INSENSITIVE);
 
     @Autowired
     public BookingClientImpl(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
@@ -55,6 +61,10 @@ public class BookingClientImpl extends BaseClient implements BookingClient {
     public ResponseEntity<Object> getUserBookings(
             @Valid @Positive long userId, String state, @Valid @PositiveOrZero int from, @Valid @Positive int size) {
 
+        Matcher matcher = STATE_FILTER_PATTERN.matcher(state);
+        if (!matcher.matches()) {
+            throw new BadRequestParamException(String.format("Unknown state: %s", state));
+        }
         Map<String, Object> parameters = Map.of(
                 "state", state,
                 "from", from,
@@ -67,6 +77,10 @@ public class BookingClientImpl extends BaseClient implements BookingClient {
     public ResponseEntity<Object> getOwnerBookings(
             @Valid @Positive long ownerId, String state, @Valid @PositiveOrZero int from, @Valid @Positive int size) {
 
+        Matcher matcher = STATE_FILTER_PATTERN.matcher(state);
+        if (!matcher.matches()) {
+            throw new BadRequestParamException(String.format("Unknown state: %s", state));
+        }
         Map<String, Object> parameters = Map.of(
                 "state", state,
                 "from", from,

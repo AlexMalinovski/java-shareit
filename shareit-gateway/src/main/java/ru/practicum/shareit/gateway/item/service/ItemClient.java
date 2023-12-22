@@ -15,7 +15,7 @@ public interface ItemClient {
     ResponseEntity<Object> getItemById(@Valid @Positive long userId, @Valid @Positive long itemId);
 
     ResponseEntity<Object> updateItem(
-            @Valid @Positive long userId, @Valid @Positive long itemId, UpdateItemDto updateItemDto);
+            @Valid @Positive long userId, @Valid @Positive long itemId, @Valid UpdateItemDto updateItemDto);
 
     ResponseEntity<Object> getOwnedItems(
             @Valid @Positive long userId, @Valid @PositiveOrZero int from, @Valid @Positive int size);

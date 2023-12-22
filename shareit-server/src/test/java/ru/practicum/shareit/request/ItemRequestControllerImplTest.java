@@ -69,52 +69,6 @@ class ItemRequestControllerImplTest {
 
     @Test
     @SneakyThrows
-    void createItemRequest_ifInvalidParams_thenStatus400() {
-        CreateItemRequestDto dtoValid = CreateItemRequestDto.builder()
-                .description("description")
-                .build();
-
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(dtoValid)))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", -1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(dtoValid)))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", 0L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(dtoValid)))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(
-                                CreateItemRequestDto.builder().build())))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(
-                                CreateItemRequestDto.builder()
-                                .description("")
-                                .build())))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @SneakyThrows
     void getOwnedItemRequests() {
         List<ItemRequest> items = new ArrayList<>();
         when(itemRequestService.getOwnedItemRequests(anyLong())).thenReturn(items);
@@ -125,22 +79,6 @@ class ItemRequestControllerImplTest {
 
         verify(itemRequestService).getOwnedItemRequests(1L);
         verify(itemRequestMapper).mapItemRequestToItemRequestDto(items);
-    }
-
-    @Test
-    @SneakyThrows
-    void getOwnedItemRequests_ifInvalidParams_thenStatus400() {
-
-        mockMvc.perform(get("/requests"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", -1L))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", 0L))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -161,47 +99,6 @@ class ItemRequestControllerImplTest {
 
     @Test
     @SneakyThrows
-    void getItemRequests_ifInvalidParams_thenStatus400() {
-
-        mockMvc.perform(get("/requests/all")
-                        .param("from", "0")
-                        .param("size", "5"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", -1L)
-                        .param("from", "0")
-                        .param("size", "5"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", 0L)
-                        .param("from", "0")
-                        .param("size", "5"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", 0L)
-                        .param("from", "-1")
-                        .param("size", "5"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", 0L)
-                        .param("from", "0")
-                        .param("size", "-5"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", 0L)
-                        .param("from", "0")
-                        .param("size", "0"))
-                .andExpect(status().isBadRequest());
-
-    }
-
-    @Test
-    @SneakyThrows
     void getItemRequestById() {
         ItemRequest request = ItemRequest.builder().build();
         when(itemRequestService.getItemRequestById(anyLong(), anyLong())).thenReturn(Optional.of(request));
@@ -212,30 +109,6 @@ class ItemRequestControllerImplTest {
 
         verify(itemRequestService).getItemRequestById(5L, 1L);
         verify(itemRequestMapper).mapItemRequestToItemRequestDto(request);
-    }
-
-    @Test
-    @SneakyThrows
-    void getItemRequestById_ifInvalidParams_thenStatus400() {
-
-        mockMvc.perform(get("/requests/-5")
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/0")
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/5")
-                        .header("X-Sharer-User-Id", -1L))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/5")
-                        .header("X-Sharer-User-Id", 0L))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/5"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

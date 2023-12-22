@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.library.api.request.dto.CreateItemRequestDto;
 
-import javax.validation.Valid;
-
 @RequestMapping(path = "/requests")
 public interface ItemRequestController {
 
@@ -25,7 +23,7 @@ public interface ItemRequestController {
      */
     @PostMapping
     ResponseEntity<Object> createItemRequest(
-            @RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid CreateItemRequestDto dto);
+            @RequestHeader("X-Sharer-User-Id") long userId, @RequestBody CreateItemRequestDto dto);
 
     /**
      * Получить список своих запросов вместе с данными об ответах на них.

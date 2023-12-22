@@ -48,7 +48,7 @@ public class ItemClientImpl extends BaseClient implements ItemClient {
     @Override
     public ResponseEntity<Object> updateItem(@Valid @Positive long userId,
                                              @Valid @Positive long itemId,
-                                             UpdateItemDto updateItemDto) {
+                                             @Valid UpdateItemDto updateItemDto) {
         return patch(String.format("/%d", itemId), userId, updateItemDto);
     }
 

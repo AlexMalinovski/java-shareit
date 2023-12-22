@@ -15,7 +15,6 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.library.api.booking.BookingController;
 import ru.practicum.shareit.library.api.booking.dto.BookingDto;
 import ru.practicum.shareit.library.api.booking.dto.CreateBookingDto;
-import ru.practicum.shareit.library.api.exception.BadRequestParamException;
 import ru.practicum.shareit.library.api.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
@@ -67,9 +66,6 @@ public class BookingControllerImpl implements BookingController {
             @RequestParam(required = false, defaultValue = "20") int size) {
 
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
-        if (stateFilter == StateFilter.UNSUPPORTED) {
-            throw new BadRequestParamException(String.format("Unknown state: %s", state));
-        }
         List<BookingDto> listDto = bookingMapper.mapBookingToBookingDto(
                 bookingService.getUserBookings(stateFilter, userId, from, size));
 
@@ -84,9 +80,6 @@ public class BookingControllerImpl implements BookingController {
             @RequestParam(required = false, defaultValue = "20") int size) {
 
         StateFilter stateFilter = enumMapper.mapStringToStateFilter(state);
-        if (stateFilter == StateFilter.UNSUPPORTED) {
-            throw new BadRequestParamException(String.format("Unknown state: %s", state));
-        }
         List<BookingDto> listDto = bookingMapper.mapBookingToBookingDto(
                 bookingService.getOwnerBookings(stateFilter, ownerId, from, size));
 
