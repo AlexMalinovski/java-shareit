@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.library.api.exception.BadRequestException;
 import ru.practicum.shareit.library.api.item.dto.CommentDto;
 import ru.practicum.shareit.library.api.item.dto.CreateCommentDto;
 import ru.practicum.shareit.library.api.item.dto.CreateItemDto;
@@ -207,6 +208,22 @@ class ItemControllerImplTest {
         verify(itemMapper).mapCreateCommentDtoToComment(getValidCreateCommentDto());
         verify(itemService).checkAuthorItemAndCreateComment(1L, 1L, getValidNewComment());
         verify(itemMapper).mapCommentToCommentDto(getValidComment());
+    }
+
+    @Test
+    void createComment_ifBookingNotFound_thenStatus400() throws Exception {
+        when(itemMapper.mapCreateCommentDtoToComment(any())).thenReturn(getValidNewComment());
+        when(itemService.checkAuthorItemAndCreateComment(anyLong(), anyLong(), any(Comment.class)))
+                .thenThrow(BadRequestException.class);
+
+        mockMvc.perform(post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(getValidCreateCommentDto())))
+                .andExpect(status().isBadRequest());
+
+        verify(itemMapper).mapCreateCommentDtoToComment(getValidCreateCommentDto());
+        verify(itemService).checkAuthorItemAndCreateComment(1L, 1L, getValidNewComment());
     }
 
 }

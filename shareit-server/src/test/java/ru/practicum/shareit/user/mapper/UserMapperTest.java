@@ -6,6 +6,8 @@ import ru.practicum.shareit.library.api.user.dto.UpdateUserDto;
 import ru.practicum.shareit.library.api.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -67,4 +69,24 @@ class UserMapperTest {
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.getEmail(), actual.getEmail());
     }
+
+    @Test
+    void mapUserToUserDto_ifSrcListNull_thenTargetNull() {
+        var actual = mapper.mapUserToUserDto((User) null);
+        assertNull(actual);
+    }
+
+    @Test
+    void mapUserToUserDto_List() {
+        List<User> expected = List.of(User.builder().id(1L).name("name").email("e@mail.ru").build());
+
+        var actual = mapper.mapUserToUserDto(expected);
+
+        assertNotNull(actual);
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals(expected.get(0).getEmail(), actual.get(0).getEmail());
+    }
+
+
 }

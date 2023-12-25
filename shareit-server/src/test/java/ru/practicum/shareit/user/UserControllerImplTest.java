@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.library.api.exception.ConflictException;
 import ru.practicum.shareit.library.api.user.dto.CreateUserDto;
 import ru.practicum.shareit.library.api.user.dto.UpdateUserDto;
 import ru.practicum.shareit.library.api.user.dto.UserDto;
@@ -87,6 +88,18 @@ class UserControllerImplTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(getValidCreateUserDto())))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void createUser_ifConflictEmail_thenStatus409() throws Exception {
+        when(userMapper.mapCreateUserDtoToUser(any())).thenReturn(getValidNewUser());
+        when(userMapper.mapUserToUserDto(any(User.class))).thenReturn(getValidUserDto());
+        when(userService.createUser(any())).thenThrow(ConflictException.class);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(getValidCreateUserDto())))
+                .andExpect(status().isConflict());
     }
 
     @Test
