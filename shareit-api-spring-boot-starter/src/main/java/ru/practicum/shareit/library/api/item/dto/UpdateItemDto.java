@@ -1,0 +1,26 @@
+package ru.practicum.shareit.library.api.item.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
+@Builder
+public class UpdateItemDto {
+
+    @Size(min = 1, max = 255)
+    @Pattern(regexp = "^(.*)\\S+(.*)$")
+    private final String name;
+
+    @Size(min = 1, max = 512)
+    @Pattern(regexp = "^(.*)\\S+(.*)$")
+    private final String description;
+
+    private final Boolean available;
+}
